@@ -131,8 +131,10 @@ private:
 
 private:
     void checkCollision();
+    void checkBulletEnemyCollision();
     void checkEnemyPlayerCollision();
     void gameReset();
+    void updateScore();
 
 
 };

@@ -3,14 +3,19 @@
 Player::Player(SettingsManager& settings, QObject *parent)
     : QObject{parent}, m_gameControllerSettings(settings)
 {
+    initialize();
+
     m_playerWidth = m_gameControllerSettings.getValue("player/width").toInt();
     m_playerHeight = m_gameControllerSettings.getValue("player/height").toInt();
 
-    auto windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-    auto windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
+    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+}
 
-    m_playerCurrentX = windowWidth / 2 - m_playerWidth / 2;
-    m_playerCurrentY = windowHeight - m_playerHeight;
+void Player::initialize()
+{
+    setPlayerCurrentX(m_windowWidth / 2 - m_playerWidth / 2);
+    setPlayerCurrentY(m_windowHeight - m_playerHeight);
 }
 
 double Player::playerCurrentX() const

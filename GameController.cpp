@@ -6,6 +6,7 @@ GameController::GameController(SettingsManager& settings, Player *player, QObjec
     : QObject{parent}, m_gameControllerSettings(settings), m_player(player)
 {
     initialize();
+
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
 
     connect(&m_enemyCreationTimer, &QTimer::timeout, this, &GameController::createEnemies);
@@ -13,6 +14,11 @@ GameController::GameController(SettingsManager& settings, Player *player, QObjec
     connect(&m_collisionTimer, &QTimer::timeout, this, &GameController::checkCollision);
 
     connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
+
+    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
+    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+
+    m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
 }
 
 
@@ -21,19 +27,15 @@ void GameController::initialize()
     m_collisionTimer.start(16);
     m_enemyCreationTimer.start(2000);
 
+    setScore(0);
+
     if(m_playerMoveTimer.isActive())
         m_playerMoveTimer.stop();
 
-    setScore(0);
-
-    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
-
-    m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
+    m_player->initialize();
 
     m_gameControllerSettings.setValue("player/startX", m_player->playerCurrentX());
     m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
-
 }
 
 
@@ -42,7 +44,6 @@ void GameController::moveLeft()
     m_moveDir = MoveDirection::LEFT;
     if(!m_playerMoveTimer.isActive())
         m_playerMoveTimer.start(16);
-
 }
 
 void GameController::moveRight()
@@ -50,7 +51,6 @@ void GameController::moveRight()
     m_moveDir = MoveDirection::RIGHT;
     if(!m_playerMoveTimer.isActive())
         m_playerMoveTimer.start(16);
-
 }
 
 int GameController::windowWidth() const
@@ -166,36 +166,46 @@ void GameController::updatePlayerMovement()
         m_player->setPlayerCurrentX(m_player->playerCurrentX() + m_playerXOffset);
 }
 
+void GameController::checkCollision()
+{
+    checkBulletEnemyCollision();
+    checkEnemyPlayerCollision();
+}
+
 bool isCollided( PlayerBullet* bullet,  Enemy* enemy) {
     QRectF bulletRect {bullet->bulletX(), bullet->bulletY(), static_cast<qreal>(bullet->bulletWidth()), static_cast<qreal>(bullet->bulletHeight())};
     QRectF enemyRect {enemy->enemyX(), enemy->enemyY(), static_cast<qreal>(enemy->enemyWidth()), static_cast<qreal>(enemy->enemyHeight())};
 
     if(bulletRect.intersects(enemyRect)) {
-        // qDebug() << "Collsion occured ";
         return true;
     }
     return false;
 }
 
-void GameController::checkCollision()
+void GameController::updateScore() {
+    setScore(m_score + 10);
+    if(m_score > 200) {
+        m_enemyCreationTimer.stop();
+        m_enemyCreationTimer.start(1800);
+    }
+    if(m_score > m_highestScore)
+        setHighestScore(m_score);
+}
+
+void GameController::checkBulletEnemyCollision()
 {
     if(m_bulletList.size() > 0 && m_enemyList.size() > 0) {
         for(int bullet = m_bulletList.size() - 1; bullet >= 0; --bullet){
-            // qDebug() << "m_bulletList.size()" << bullet;
             for(int enemy = m_enemyList.size() - 1; enemy >= 0; --enemy) {
-
                 if(isCollided(m_bulletList[bullet], m_enemyList[enemy])){
                     destroyBullet(m_bulletList[bullet]);
                     destroyEnemy(m_enemyList[enemy]);
-                    setScore(m_score + 10);
-                    if(m_score > m_highestScore)
-                        setHighestScore(m_score);
+                    updateScore();
                     break;
                 }
             }
         }
     }
-    checkEnemyPlayerCollision();
 }
 
 void GameController::checkEnemyPlayerCollision()

@@ -17,6 +17,8 @@ class Player : public QObject
 public:
     explicit Player(SettingsManager& settings, QObject *parent = nullptr);
 
+    void initialize();
+
     double playerCurrentX() const;
     void setPlayerCurrentX(double newPlayerCurrentX);
 
@@ -42,6 +44,8 @@ private:
     double m_playerCurrentY;
     int m_playerWidth;
     int m_playerHeight;
+    int m_windowWidth;
+    int m_windowHeight;
 
     SettingsManager& m_gameControllerSettings;
 };
