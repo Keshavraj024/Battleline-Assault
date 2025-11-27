@@ -2,10 +2,10 @@ import QtQuick
 
 Item {
     id: playerRect
-    width: GameController === null ? 0 : GameController.playerWidth
-    height: GameController === null ? 0 : GameController.playerHeight
-    x: GameController === null ? 0 : GameController.currentX
-    y: GameController === null ? 0 : GameController.currentY
+    width: PlayerController === null ? 0 : PlayerController.playerWidth
+    height: PlayerController === null ? 0 : PlayerController.playerHeight
+    x: PlayerController === null ? 0 : PlayerController.playerCurrentX
+    y: PlayerController === null ? 0 : PlayerController.playerCurrentY
     focus: true
 
     Image {
@@ -42,4 +42,5 @@ Item {
                          if(event.key === Qt.Key_Left || event.key === Qt.Key_Right)
                          GameController.stopPlayerMoveTimer()
                      }
+
 }

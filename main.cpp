@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include "SettingsManager.h"
 #include "GameController.h"
+#include "Player.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,13 +13,13 @@ int main(int argc, char *argv[])
 
     SettingsManager gameSettings;
 
-    GameController gameController(gameSettings, &app);
+    Player *player = new Player(gameSettings, &app);
 
-    // PlayerBullet playerBullet(gameSettings, &app);
+    GameController gameController(gameSettings, player, &app);
 
     engine.rootContext()->setContextProperty("GameController", &gameController);
 
-    // engine.rootContext()->setContextProperty("Bullet", &playerBullet);
+    engine.rootContext()->setContextProperty("PlayerController", player);
 
     QObject::connect(
         &engine,

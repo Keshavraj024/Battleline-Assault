@@ -8,24 +8,21 @@
 #include "PlayerBullet.h"
 #include "SettingsManager.h"
 #include "Enemy.h"
+#include "Player.h"
 
 class GameController : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(double currentX READ currentX WRITE setCurrentX NOTIFY currentXChanged FINAL)
-    Q_PROPERTY(double currentY READ currentY WRITE setCurrentY NOTIFY currentYChanged FINAL)
     Q_PROPERTY(int windowWidth READ windowWidth WRITE setWindowWidth NOTIFY windowWidthChanged FINAL)
     Q_PROPERTY(int windowHeight READ windowHeight WRITE setWindowHeight NOTIFY windowHeightChanged FINAL)
-    Q_PROPERTY(int playerWidth READ playerWidth WRITE setPlayerWidth NOTIFY playerWidthChanged FINAL)
-    Q_PROPERTY(int playerHeight READ playerHeight WRITE setPlayerHeight NOTIFY playerHeightChanged FINAL)
     Q_PROPERTY(QQmlListProperty<PlayerBullet> bullets READ bullets NOTIFY bulletsChanged FINAL)
     Q_PROPERTY(QQmlListProperty<Enemy> enemies READ enemies NOTIFY enemiesChanged FINAL)
     Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged FINAL)
     Q_PROPERTY(int highestScore READ highestScore WRITE setHighestScore NOTIFY highestScoreChanged FINAL)
 
 public:
-    explicit GameController(SettingsManager& settings,QObject *parent = nullptr);
+    explicit GameController(SettingsManager& settings, Player *player, QObject *parent = nullptr);
 
     enum class MoveDirection {
         LEFT,
@@ -105,15 +102,11 @@ private slots:
     void updatePlayerMovement();
 
 private:
-    double m_currentX;
-    double m_currentY;
-    double m_xOffset {10};
-    double m_yOffset {0};
+    double m_playerXOffset {10};
+    double m_playerYOffset {0};
     int m_minX {0};
     int m_windowWidth;
     int m_windowHeight;
-    int m_playerWidth;
-    int m_playerHeight;
     float m_gravity {0.5};
     int m_score {0};
     int m_highestScore {0};
@@ -132,6 +125,9 @@ private:
     QQmlListProperty<Enemy> m_enemies;
 
     MoveDirection m_moveDir {MoveDirection::NONE};
+
+    Player *m_player;
+
 
 private:
     void checkCollision();

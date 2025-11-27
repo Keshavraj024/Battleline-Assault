@@ -22,7 +22,6 @@ Window {
     Image {
         id: backgroundImage
         anchors.fill: parent
-
         // fillMode: Image.PreserveAspectFit
         source : "Assets/bgImg_1.png"
         Rectangle {

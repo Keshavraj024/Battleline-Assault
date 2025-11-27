@@ -44,6 +44,7 @@ qt_add_qml_module(appBattleline_Assault
         Assets/Fonts/Doto-Bold.ttf
         Assets/Fonts/Doto-ExtraBold.ttf
         Assets/bgImg_1.png
+        SOURCES Player.h Player.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

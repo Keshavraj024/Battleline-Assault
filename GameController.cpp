@@ -1,8 +1,9 @@
 #include "GameController.h"
 #include <QRectF>
+#include <QRandomGenerator>
 
-GameController::GameController(SettingsManager& settings,QObject *parent)
-    : QObject{parent}, m_gameControllerSettings(settings)
+GameController::GameController(SettingsManager& settings, Player *player, QObject *parent)
+    : QObject{parent}, m_gameControllerSettings(settings), m_player(player)
 {
     initialize();
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
@@ -28,45 +29,13 @@ void GameController::initialize()
     m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
     m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
 
-    m_playerWidth = m_gameControllerSettings.getValue("player/width").toInt();
-    m_playerHeight = m_gameControllerSettings.getValue("player/height").toInt();
-
     m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
 
-    setCurrentX(m_windowWidth / 2 - m_playerWidth / 2);
-    setCurrentY(m_windowHeight - m_playerHeight);
+    m_gameControllerSettings.setValue("player/startX", m_player->playerCurrentX());
+    m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
 
-    // qDebug() << currentX() << currentY();
-
-    m_gameControllerSettings.setValue("player/startX", currentX());
-    m_gameControllerSettings.setValue("player/startY", currentY());
 }
 
-double GameController::currentX() const
-{
-    return m_currentX;
-}
-
-void GameController::setCurrentX(double newCurrentX)
-{
-    if (qFuzzyCompare(m_currentX, newCurrentX))
-        return;
-    m_currentX = newCurrentX;
-    emit currentXChanged();
-}
-
-double GameController::currentY() const
-{
-    return m_currentY;
-}
-
-void GameController::setCurrentY(double newCurrentY)
-{
-    if (qFuzzyCompare(m_currentY, newCurrentY))
-        return;
-    m_currentY = newCurrentY;
-    emit currentYChanged();
-}
 
 void GameController::moveLeft()
 {
@@ -110,61 +79,33 @@ void GameController::setWindowHeight(int newWindowHeight)
     emit windowHeightChanged();
 }
 
-
-int GameController::playerWidth() const
-{
-    return m_playerWidth;
-}
-
-void GameController::setPlayerWidth(int newPlayerWidth)
-{
-    if (m_playerWidth == newPlayerWidth)
-        return;
-    m_playerWidth = newPlayerWidth;
-    emit playerWidthChanged();
-}
-
-int GameController::playerHeight() const
-{
-    return m_playerHeight;
-}
-
-void GameController::setPlayerHeight(int newPlayerHeight)
-{
-    if (m_playerHeight == newPlayerHeight)
-        return;
-    m_playerHeight = newPlayerHeight;
-    emit playerHeightChanged();
-}
-
 void GameController::applyBoost()
 {
-    m_yOffset = -10;
+    m_playerYOffset = -10;
     if(!m_thrustTimer.isActive())
         m_thrustTimer.start(16); // 60 FPS
 }
 
 void GameController::shootBullet()
 {
-    m_gameControllerSettings.setValue("player/startX", m_currentX);
-    m_gameControllerSettings.setValue("player/startY", m_currentY);
+    m_gameControllerSettings.setValue("player/startX", m_player->playerCurrentX());
+    m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
 
     PlayerBullet* newBullet = new PlayerBullet(m_gameControllerSettings);
     connect(newBullet, &PlayerBullet::bulletOutofWindow, this, &GameController::destroyBullet);
     m_bulletList.append(newBullet);
 
-
-    // qDebug() << "Creating Player bullet" << m_bulletList.size();
     emit bulletsChanged();
 }
 
 void GameController::createEnemies()
 {
-    m_gameControllerSettings.setValue("enemy/startX", rand() % m_windowWidth - 20);
+    quint32 enemyStartX = QRandomGenerator::global()->bounded(50, m_windowWidth - 50);
+
+    m_gameControllerSettings.setValue("enemy/startX", enemyStartX);
 
     m_enemyList.append(new Enemy(m_gameControllerSettings));
-    // qDebug() << "Creating Player bullet" << m_bulletList.size();
-    // checkEnemyPlayerCollision();
+
     emit enemiesChanged();
 }
 
@@ -178,16 +119,14 @@ void GameController::stopPlayerMoveTimer()
 void GameController::restartGame()
 {
     initialize();
-    // emit currentXChanged();
-    // emit currentYChanged();
 }
 
 void GameController::applyGravity()
 {
-    double newYPos = m_currentY + m_yOffset;
+    double newYPos = m_player->playerCurrentY() + m_playerYOffset;
 
-    if(newYPos > (m_windowHeight - m_playerHeight)){
-        newYPos = m_windowHeight - m_playerHeight;
+    if(newYPos > (m_windowHeight - m_player->playerHeight())){
+        newYPos = m_windowHeight - m_player->playerHeight();
         if(m_thrustTimer.isActive())
             m_thrustTimer.stop();
     }
@@ -195,8 +134,8 @@ void GameController::applyGravity()
     if(newYPos < m_windowHeight / 2)
         newYPos = m_windowHeight / 2;
 
-    setCurrentY(newYPos);
-    m_yOffset += m_gravity;
+    m_player->setPlayerCurrentY(newYPos);
+    m_playerYOffset += m_gravity;
 }
 
 void GameController::destroyBullet(PlayerBullet* bulletToDestroy)
@@ -206,7 +145,6 @@ void GameController::destroyBullet(PlayerBullet* bulletToDestroy)
         delete m_bulletList[index];
         m_bulletList.removeAt(index);
         emit bulletsChanged();
-        // qDebug() << "Bullet Destroyed ";
     }
 }
 
@@ -217,16 +155,15 @@ void GameController::destroyEnemy(Enemy* enemyToDestroy)
         delete m_enemyList[index];
         m_enemyList.removeAt(index);
         emit enemiesChanged();
-        // qDebug() << "Enemy Destroyed ";
     }
 }
 
 void GameController::updatePlayerMovement()
 {
-    if(m_moveDir == MoveDirection::LEFT && m_currentX > m_minX)
-        setCurrentX(m_currentX - m_xOffset);
-    else if(m_moveDir == MoveDirection::RIGHT && m_currentX < (m_windowWidth - m_playerWidth))
-        setCurrentX(m_currentX + m_xOffset);
+    if(m_moveDir == MoveDirection::LEFT && m_player->playerCurrentX() > m_minX)
+        m_player->setPlayerCurrentX(m_player->playerCurrentX() - m_playerXOffset);
+    else if(m_moveDir == MoveDirection::RIGHT && m_player->playerCurrentX() < (m_windowWidth - m_player->playerWidth()))
+        m_player->setPlayerCurrentX(m_player->playerCurrentX() + m_playerXOffset);
 }
 
 bool isCollided( PlayerBullet* bullet,  Enemy* enemy) {
@@ -264,13 +201,13 @@ void GameController::checkCollision()
 void GameController::checkEnemyPlayerCollision()
 {
     foreach(Enemy* enemy, m_enemyList) {
-        QRectF playerRect {this->m_currentX, this->m_currentY, static_cast<qreal>(this->m_playerWidth), static_cast<qreal>(this->m_playerHeight)};
+        QRectF playerRect {this->m_player->playerCurrentX(), this->m_player->playerCurrentY(), static_cast<qreal>(m_player->playerWidth()), static_cast<qreal>(m_player->playerHeight())};
         QRectF enemyRect {enemy->enemyX(), enemy->enemyY(), static_cast<qreal>(enemy->enemyWidth()), static_cast<qreal>(enemy->enemyHeight())};
 
         if(enemy->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
             destroyEnemy(enemy);
             emit gameOver();
-            // gameReset();
+            gameReset();
             break;
         }
     }
