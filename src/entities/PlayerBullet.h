@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include "SettingsManager.h"
+#include "../core/SettingsManager.h"
 
 class PlayerBullet : public QObject
 {

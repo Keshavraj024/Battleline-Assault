@@ -5,10 +5,10 @@
 #include <QSettings>
 #include <QTimer>
 #include <QQmlListProperty>
-#include "PlayerBullet.h"
+#include "../entities/PlayerBullet.h"
 #include "SettingsManager.h"
-#include "Enemy.h"
-#include "Player.h"
+#include "../entities/Enemy.h"
+#include "../entities/Player.h"
 
 class GameController : public QObject
 {

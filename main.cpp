@@ -1,9 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "SettingsManager.h"
-#include "GameController.h"
-#include "Player.h"
+#include "src/core/SettingsManager.h"
+#include "src/core/GameController.h"
+#include "src/entities/Player.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    SettingsManager gameSettings;
+    SettingsManager gameSettings{};
 
     Player *player = new Player(gameSettings, &app);
 

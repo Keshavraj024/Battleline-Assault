@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include <QObject>
-#include "SettingsManager.h"
+#include "../core/SettingsManager.h"
 
 class Player : public QObject
 {

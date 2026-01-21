@@ -48,7 +48,7 @@ Window {
 
             Text {
                 id: gameOverText
-                text: "Game Over Bruhhhhh!!!!"
+                text: "Game Over!!!!"
                 color: "white"
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 

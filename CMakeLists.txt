@@ -8,6 +8,8 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
+add_subdirectory(src)
+
 qt_add_executable(appBattleline_Assault
     main.cpp
 )
@@ -21,12 +23,7 @@ qt_add_qml_module(appBattleline_Assault
         Enemy.qml
         Player.qml
         CustomText.qml
-    SOURCES
-        GameController.h GameController.cpp
-        PlayerBullet.h PlayerBullet.cpp
-        SettingsManager.h SettingsManager.cpp
-        Enemy.h Enemy.cpp
-    RESOURCES
+   RESOURCES
         Assets/Enemies/AbyssalHexcrawler.png
         Assets/Enemies/AshmawSpectralite.png
         Assets/Enemies/BlazefangOverseer.png
@@ -44,7 +41,6 @@ qt_add_qml_module(appBattleline_Assault
         Assets/Fonts/Doto-Bold.ttf
         Assets/Fonts/Doto-ExtraBold.ttf
         Assets/bgImg_1.png
-        SOURCES Player.h Player.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -59,7 +55,7 @@ set_target_properties(appBattleline_Assault PROPERTIES
 )
 
 target_link_libraries(appBattleline_Assault
-    PRIVATE Qt6::Quick
+    PUBLIC Qt6::Quick core entities
 )
 
 include(GNUInstallDirs)
