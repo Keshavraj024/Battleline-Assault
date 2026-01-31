@@ -13,35 +13,7 @@ add_subdirectory(src)
 qt_add_executable(appBattleline_Assault
     main.cpp
 )
-
-qt_add_qml_module(appBattleline_Assault
-    URI Battleline_Assault
-    VERSION 1.0
-    QML_FILES
-        Main.qml
-        PlayerBullet.qml
-        Enemy.qml
-        Player.qml
-        CustomText.qml
-   RESOURCES
-        Assets/Enemies/AbyssalHexcrawler.png
-        Assets/Enemies/AshmawSpectralite.png
-        Assets/Enemies/BlazefangOverseer.png
-        Assets/Enemies/CindervoidRavager.png
-        Assets/Enemies/EmberclawRavager.png
-        Assets/Enemies/InfernicTalonspawn.png
-        Assets/Enemies/IronbaneSkitterlord.png
-        Assets/Enemies/NetherfangSentinel.png
-        Assets/Enemies/PyroniteWarDrone.png
-        Assets/Enemies/PyrothorSovereign.png
-        Assets/Enemies/VoidclawIncinerator.png
-        Assets/Enemies/VoidreaverStrix.png
-        Assets/Player/Skyfire.png
-        Assets/Player/flame_flicker.gif
-        Assets/Fonts/Doto-Bold.ttf
-        Assets/Fonts/Doto-ExtraBold.ttf
-        Assets/bgImg_1.png
-)
+include(qmlmodules)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
