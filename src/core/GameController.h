@@ -20,6 +20,7 @@ class GameController : public QObject
     Q_PROPERTY(QQmlListProperty<Enemy> enemies READ enemies NOTIFY enemiesChanged FINAL)
     Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged FINAL)
     Q_PROPERTY(int highestScore READ highestScore WRITE setHighestScore NOTIFY highestScoreChanged FINAL)
+    Q_PROPERTY(int level READ level WRITE setLevel NOTIFY levelChanged FINAL)
 
 public:
     explicit GameController(SettingsManager& settings, Player *player, QObject *parent = nullptr);
@@ -73,6 +74,9 @@ public:
     int highestScore() const;
     void setHighestScore(int newHighestScore);
 
+    int level() const;
+    void setLevel(int newLevel);
+
 signals:
     void currentXChanged();
     void currentYChanged();
@@ -94,6 +98,8 @@ signals:
     void gameOver();
 
     void highestScoreChanged();
+
+    void levelChanged();
 
 private slots:
     void applyGravity();
@@ -136,7 +142,7 @@ private:
     void gameReset();
     void updateScore();
 
-
+    int m_level;
 };
 
 #endif // GAMECONTROLLER_H

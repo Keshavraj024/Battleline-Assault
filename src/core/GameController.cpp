@@ -188,6 +188,8 @@ void GameController::updateScore() {
         m_enemyCreationTimer.stop();
         m_enemyCreationTimer.start(1800);
     }
+    if (m_score % 10 == 0)
+        setLevel(m_level + 1);
     if(m_score > m_highestScore)
         setHighestScore(m_score);
 }
@@ -216,8 +218,8 @@ void GameController::checkEnemyPlayerCollision()
 
         if(enemy->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
             destroyEnemy(enemy);
-            emit gameOver();
-            gameReset();
+            // emit gameOver();
+            // gameReset();
             break;
         }
     }
@@ -281,4 +283,17 @@ void GameController::setHighestScore(int newHighestScore)
         return;
     m_highestScore = newHighestScore;
     emit highestScoreChanged();
+}
+
+int GameController::level() const
+{
+    return m_level;
+}
+
+void GameController::setLevel(int newLevel)
+{
+    if (m_level == newLevel)
+        return;
+    m_level = newLevel;
+    emit levelChanged();
 }

@@ -12,6 +12,7 @@ Window {
 
     property int score : GameController === null ? 0 : GameController.score
     property int highestScore : GameController === null ? 0 : GameController.highestScore
+    property int gameLevel: GameController === null ? 0 : GameController.level
 
     FontLoader {
         id: fontLoader
@@ -151,7 +152,7 @@ Window {
 
     CustomText {
         id: levelBoard
-        customText: "Level : " + 0
+        customText: "Level : " + root.gameLevel
 
         anchors {
             left: parent.left
