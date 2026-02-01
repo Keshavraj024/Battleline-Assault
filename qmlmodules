@@ -25,4 +25,7 @@ qt_add_qml_module(appBattleline_Assault
         qml/Assets/Fonts/Doto-Bold.ttf
         qml/Assets/Fonts/Doto-ExtraBold.ttf
         qml/Assets/bgImg_1.png
+        qml/Assets/Sounds/hit.wav
+        qml/Assets/Sounds/shoot.wav
+        qml/Assets/Sounds/game_over.wav
 )

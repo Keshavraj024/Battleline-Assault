@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include "../core/SettingsManager.h"
+#include "SettingsManager.h"
 
 class Enemy : public QObject
 {
@@ -15,7 +15,7 @@ class Enemy : public QObject
     Q_PROPERTY(int enemyImageIndex READ enemyImageIndex WRITE setEnemyImageIndex NOTIFY enemyImageIndexChanged FINAL)
 
 public:
-    explicit Enemy(SettingsManager& settings,QObject *parent = nullptr);
+    explicit Enemy(QObject *parent = nullptr);
 
     void initialize();
 
@@ -53,13 +53,25 @@ private:
     int m_enemyWidth;
     int m_enemyHeight;
     int m_windowHeight;
+    int m_windowWidth;
 
     double m_enemyFallSpeed {5};
 
-    SettingsManager& m_gameControllerSettings;
+    SettingsManager &m_gameControllerSettings = SettingsManager::instance();
 
     QTimer m_enemyFalltimer;
     int m_enemyImageIndex;
+    QList<Enemy *> m_enemyList{};
+
+private:
+    friend class GameController;
+    void destroyEnemy(Enemy *enemyToDestroy);
+    QList<Enemy *> &getEnemyLists();
+    void addEnemy();
+    bool IsEmpty() const;
+    void clearEnemyLists();
+    size_t enemyListsSize() const;
+    void enemyReset();
 };
 
 #endif // ENEMY_H

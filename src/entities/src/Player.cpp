@@ -1,7 +1,7 @@
 #include "Player.h"
 
-Player::Player(SettingsManager& settings, QObject *parent)
-    : QObject{parent}, m_gameControllerSettings(settings)
+Player::Player(QObject *parent)
+    : QObject{parent}
 {
     initialize();
 

@@ -1,7 +1,8 @@
 #include "Enemy.h"
+#include <QRandomGenerator>
 
-Enemy::Enemy(SettingsManager& settings,QObject *parent)
-    : QObject{parent}, m_gameControllerSettings(settings)
+Enemy::Enemy(QObject *parent)
+    : QObject{parent}
 {
     initialize();
     connect(&m_enemyFalltimer, &QTimer::timeout, this, &Enemy::updateEnemyPos);
@@ -14,12 +15,12 @@ void Enemy::initialize()
     m_enemyHeight = m_gameControllerSettings.getValue("enemy/height").toInt();
 
     m_windowHeight =  m_gameControllerSettings.getValue("window/height").toInt();
+    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
 
     m_enemyY = m_gameControllerSettings.getValue("enemy/startY").toDouble();
     m_enemyX = m_gameControllerSettings.getValue("enemy/startX").toDouble();
 
     int enemyCount = m_gameControllerSettings.getValue("enemy/count").toInt();
-
     m_enemyImageIndex = rand() % enemyCount;
 }
 
@@ -83,8 +84,54 @@ void Enemy::updateEnemyPos()
     if(m_enemyY > m_windowHeight) {
         m_enemyFalltimer.stop();
     }
+}
 
+void Enemy::destroyEnemy(Enemy *enemyToDestroy)
+{
+    auto index = m_enemyList.indexOf(enemyToDestroy);
+    if (index != -1) {
+        delete m_enemyList[index];
+        m_enemyList.removeAt(index);
+    }
+}
 
+QList<Enemy *> &Enemy::getEnemyLists()
+{
+    return m_enemyList;
+}
+
+void Enemy::addEnemy()
+{
+    quint32 enemyStartX = QRandomGenerator::global()->bounded(50, m_windowWidth - 50);
+
+    m_gameControllerSettings.setValue("enemy/startX", enemyStartX);
+
+    m_enemyList.append(new Enemy());
+}
+
+bool Enemy::IsEmpty() const
+{
+    return m_enemyList.empty();
+}
+
+void Enemy::clearEnemyLists()
+{
+    m_enemyList.clear();
+}
+
+size_t Enemy::enemyListsSize() const
+{
+    return m_enemyList.size();
+}
+
+void Enemy::enemyReset()
+{
+    if (!IsEmpty()) {
+        foreach (Enemy *enemy, m_enemyList) {
+            delete enemy;
+        }
+        clearEnemyLists();
+    }
 }
 
 int Enemy::enemyImageIndex() const

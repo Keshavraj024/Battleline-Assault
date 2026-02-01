@@ -106,7 +106,7 @@ Window {
                     onClicked: {
                         gameOverRect.visible = false
                         playerRect.focus = true
-                        GameController.restartGame()
+                        GameController.initialize()
                     }
                 }
             }

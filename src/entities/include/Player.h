@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include <QObject>
-#include "../core/SettingsManager.h"
+#include "SettingsManager.h"
 
 class Player : public QObject
 {
@@ -15,7 +15,7 @@ class Player : public QObject
     Q_PROPERTY(int playerHeight READ playerHeight WRITE setPlayerHeight NOTIFY playerHeightChanged FINAL)
 
 public:
-    explicit Player(SettingsManager& settings, QObject *parent = nullptr);
+    explicit Player(QObject *parent = nullptr);
 
     void initialize();
 
@@ -47,7 +47,7 @@ private:
     int m_windowWidth;
     int m_windowHeight;
 
-    SettingsManager& m_gameControllerSettings;
+    SettingsManager &m_gameControllerSettings = SettingsManager::instance();
 };
 
 #endif // PLAYER_H

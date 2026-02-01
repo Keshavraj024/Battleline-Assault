@@ -2,13 +2,14 @@
 #define GAMECONTROLLER_H
 
 #include <QObject>
+#include <QQmlListProperty>
 #include <QSettings>
 #include <QTimer>
-#include <QQmlListProperty>
-#include "../entities/PlayerBullet.h"
+#include "AudioManager.h"
+#include "Enemy.h"
+#include "Player.h"
+#include "PlayerBullet.h"
 #include "SettingsManager.h"
-#include "../entities/Enemy.h"
-#include "../entities/Player.h"
 
 class GameController : public QObject
 {
@@ -23,7 +24,7 @@ class GameController : public QObject
     Q_PROPERTY(int level READ level WRITE setLevel NOTIFY levelChanged FINAL)
 
 public:
-    explicit GameController(SettingsManager& settings, Player *player, QObject *parent = nullptr);
+    explicit GameController(Player *player, QObject *parent = nullptr);
 
     enum class MoveDirection {
         LEFT,
@@ -36,13 +37,10 @@ public:
     Q_INVOKABLE void applyBoost();
 
     Q_INVOKABLE void shootBullet();
-    Q_INVOKABLE void createEnemies();
 
     Q_INVOKABLE void stopPlayerMoveTimer();
 
-    Q_INVOKABLE void restartGame();
-
-    void initialize();
+    Q_INVOKABLE void initialize();
 
     double currentX() const;
     void setCurrentX(double newCurrentX);
@@ -103,8 +101,6 @@ signals:
 
 private slots:
     void applyGravity();
-    void destroyBullet(PlayerBullet* bulletToDestroy);
-    void destroyEnemy(Enemy* enemyToDestroy);
     void updatePlayerMovement();
 
 private:
@@ -116,18 +112,22 @@ private:
     float m_gravity {0.5};
     int m_score {0};
     int m_highestScore {0};
+    int m_level{1};
 
-    SettingsManager& m_gameControllerSettings;
+    SettingsManager &m_gameControllerSettings = SettingsManager::instance();
 
     QTimer m_thrustTimer;
     QTimer m_enemyCreationTimer;
     QTimer m_collisionTimer;
     QTimer m_playerMoveTimer;
+    QTimer m_bulletCreationTimer;
 
-    QList<PlayerBullet*> m_bulletList {};
     QQmlListProperty<PlayerBullet> m_bullets;
 
-    QList<Enemy*> m_enemyList {};
+    PlayerBullet m_bullet;
+    Enemy m_enemy;
+    AudioManager m_audioManager;
+
     QQmlListProperty<Enemy> m_enemies;
 
     MoveDirection m_moveDir {MoveDirection::NONE};
@@ -141,8 +141,6 @@ private:
     void checkEnemyPlayerCollision();
     void gameReset();
     void updateScore();
-
-    int m_level;
 };
 
 #endif // GAMECONTROLLER_H

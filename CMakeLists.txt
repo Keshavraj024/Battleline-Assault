@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(Battleline_Assault VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
@@ -13,6 +14,9 @@ add_subdirectory(src)
 qt_add_executable(appBattleline_Assault
     main.cpp
 )
+
+target_include_directories(appBattleline_Assault PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/core/include)
+
 include(qmlmodules)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
