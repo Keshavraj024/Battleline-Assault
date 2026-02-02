@@ -16,6 +16,10 @@ AudioManager::AudioManager(QObject *parent)
     m_shootSound.setSource(
         QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/shoot.wav"));
     m_shootSound.setVolume(1.0f);
+
+    m_clickSound.setSource(
+        QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/click.wav"));
+    m_clickSound.setVolume(1.0f);
 }
 
 void AudioManager::play(QSoundEffect &effect)
@@ -40,6 +44,11 @@ void AudioManager::playGameOver()
 void AudioManager::playShoot()
 {
     play(m_shootSound);
+}
+
+void AudioManager::playClick()
+{
+    play(m_clickSound);
 }
 
 void AudioManager::setMuted(bool muted)

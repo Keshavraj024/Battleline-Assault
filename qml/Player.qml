@@ -6,7 +6,6 @@ Item {
     height: PlayerController === null ? 0 : PlayerController.playerHeight
     x: PlayerController === null ? 0 : PlayerController.playerCurrentX
     y: PlayerController === null ? 0 : PlayerController.playerCurrentY
-    focus: true
 
     Image {
         id: playerImage
@@ -25,10 +24,10 @@ Item {
 
     Keys.onPressed: (event) => {
                         if(event.key === Qt.Key_Left){
-                            GameController.moveLeft()
+                            GameController.moveLeftPressed()
                         }
                         if(event.key === Qt.Key_Right){
-                            GameController.moveRight()
+                            GameController.moveRightPressed()
                         }
                         if(event.key === Qt.Key_Up){
                             GameController.applyBoost()
@@ -36,11 +35,14 @@ Item {
                         if(event.key === Qt.Key_Space) {
                             GameController.shootBullet()
                         }
+                        if(event.key === Qt.Key_Escape) {
+                            GameController.pauseGame()
+                        }
                     }
 
     Keys.onReleased: (event) => {
-                         if(event.key === Qt.Key_Left || event.key === Qt.Key_Right)
-                         GameController.stopPlayerMoveTimer()
+                         if (event.key === Qt.Key_Left || event.key === Qt.Key_Right)
+                         GameController.moveReleased()
                      }
 
 }

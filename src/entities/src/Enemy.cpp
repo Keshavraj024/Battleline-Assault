@@ -88,6 +88,7 @@ void Enemy::updateEnemyPos()
 
 void Enemy::destroyEnemy(Enemy *enemyToDestroy)
 {
+    // TODO: enemy list hash map
     auto index = m_enemyList.indexOf(enemyToDestroy);
     if (index != -1) {
         delete m_enemyList[index];
@@ -132,6 +133,18 @@ void Enemy::enemyReset()
         }
         clearEnemyLists();
     }
+}
+
+void Enemy::stopEnemyFallTimer()
+{
+    for (auto &enemy : m_enemyList)
+        enemy->m_enemyFalltimer.stop();
+}
+
+void Enemy::resumeEnemyFallTimer()
+{
+    for (auto &enemy : m_enemyList)
+        enemy->m_enemyFalltimer.start();
 }
 
 int Enemy::enemyImageIndex() const

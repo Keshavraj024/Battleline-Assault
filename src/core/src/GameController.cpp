@@ -1,4 +1,5 @@
 #include "GameController.h"
+#include <QCoreApplication>
 #include <QRandomGenerator>
 #include <QRectF>
 
@@ -7,40 +8,53 @@ constexpr int LEVEL_UP_ENTRY = 100;
 constexpr int BASE_INTERVAL = 2000;
 constexpr int DECREASE_PER_LEVEL = 100;
 constexpr int MIN_INTERVAL = 200;
+constexpr qreal PLAYER_MAX_SPEED = 500.0;
+constexpr qreal PLAYER_ACCL = 3000.0;
+constexpr qreal PLAYER_FRICTION = 2500.0;
 
 GameController::GameController(Player *player, QObject *parent)
     : QObject{parent}
     , m_player(player)
 {
-    initialize();
+    // initialize();
+    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
+    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+
+    m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
 
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
+    m_thrustTimer.setInterval(16);
 
     connect(&m_enemyCreationTimer, &QTimer::timeout, this, [this]() {
         m_enemy.addEnemy();
         emit enemiesChanged();
     });
+    m_enemyCreationTimer.setInterval(BASE_INTERVAL);
 
     connect(&m_collisionTimer, &QTimer::timeout, this, &GameController::checkCollision);
+    m_collisionTimer.setInterval(16);
 
     connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
+    m_playerMoveTimer.setInterval(16);
 
-    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
-
-    m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
+    // m_timerVector.push_back(m_enemyCreationTimer);
+    // m_timerVector.push_back(m_playerMoveTimer);
+    // m_timerVector.push_back(m_collisionTimer);
+    // m_timerVector.push_back(m_elapsedTimer);
 }
 
 void GameController::initialize()
 {
-    m_collisionTimer.start(16);
-    m_enemyCreationTimer.start(BASE_INTERVAL);
+    // for (auto &timer : m_timerVector)
+    //     timer.start();
+    m_enemyCreationTimer.start();
+    m_playerMoveTimer.start();
+    m_collisionTimer.start();
 
-    setScore(0);
+    m_elapsedTimer.start();
+
+    setScore(m_score);
     setLevel(m_level);
-
-    if (m_playerMoveTimer.isActive())
-        m_playerMoveTimer.stop();
 
     m_player->initialize();
 
@@ -50,18 +64,62 @@ void GameController::initialize()
     m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
 }
 
-void GameController::moveLeft()
+void GameController::moveReleased()
 {
-    m_moveDir = MoveDirection::LEFT;
-    if (!m_playerMoveTimer.isActive())
-        m_playerMoveTimer.start(16);
+    m_moveDir = MoveDirection::NONE;
 }
 
-void GameController::moveRight()
+void GameController::startGame()
+{
+    setGameState(GameState::RUNNING);
+    initialize();
+}
+
+void GameController::pauseGame()
+{
+    if (m_gameState == GameState::RUNNING) {
+        pauseAllTimers();
+        setGameState(GameState::PAUSED);
+    }
+}
+
+void GameController::resumeGame()
+{
+    if (m_gameState == GameState::PAUSED) {
+        m_enemyCreationTimer.start();
+        m_playerMoveTimer.start();
+        m_collisionTimer.start();
+
+        m_enemy.resumeEnemyFallTimer();
+
+        setGameState(GameState::RUNNING);
+    }
+}
+
+void GameController::restartGame()
+{
+    gameReset();
+    startGame();
+}
+
+void GameController::quitGame()
+{
+    QCoreApplication::quit();
+}
+
+void GameController::playClickSound()
+{
+    m_audioManager.playClick();
+}
+
+void GameController::moveLeftPressed()
+{
+    m_moveDir = MoveDirection::LEFT;
+}
+
+void GameController::moveRightPressed()
 {
     m_moveDir = MoveDirection::RIGHT;
-    if (!m_playerMoveTimer.isActive())
-        m_playerMoveTimer.start(16);
 }
 
 int GameController::windowWidth() const
@@ -94,7 +152,7 @@ void GameController::applyBoost()
 {
     m_playerYOffset = -10;
     if (!m_thrustTimer.isActive())
-        m_thrustTimer.start(16); // 60 FPS
+        m_thrustTimer.start(); // 60 FPS
 }
 
 void GameController::shootBullet()
@@ -109,13 +167,6 @@ void GameController::shootBullet()
         emit bulletsChanged();
         m_bulletCreationTimer.start(50);
     }
-}
-
-void GameController::stopPlayerMoveTimer()
-{
-    m_moveDir = MoveDirection::NONE;
-    if (m_playerMoveTimer.isActive())
-        m_playerMoveTimer.stop();
 }
 
 void GameController::applyGravity()
@@ -137,11 +188,39 @@ void GameController::applyGravity()
 
 void GameController::updatePlayerMovement()
 {
-    if (m_moveDir == MoveDirection::LEFT && m_player->playerCurrentX() > m_minX)
-        m_player->setPlayerCurrentX(m_player->playerCurrentX() - m_playerXOffset);
-    else if (m_moveDir == MoveDirection::RIGHT
-             && m_player->playerCurrentX() < (m_windowWidth - m_player->playerWidth()))
-        m_player->setPlayerCurrentX(m_player->playerCurrentX() + m_playerXOffset);
+    qreal dt = m_elapsedTimer.restart() / 1000.0; //(sec)
+
+    qreal input = 0.0;
+    if (m_moveDir == MoveDirection::LEFT)
+        input = -1.0;
+
+    if (m_moveDir == MoveDirection::RIGHT)
+        input = 1.0;
+
+    if (input != 0.0)
+        m_velocityX += PLAYER_ACCL * input * dt;
+    else {
+        if (m_velocityX < 0.0)
+            m_velocityX = std::min(0.0, m_velocityX + PLAYER_FRICTION * dt);
+        else if (m_velocityX > 0.0)
+            m_velocityX = std::max(0.0, m_velocityX - PLAYER_FRICTION * dt);
+    }
+
+    m_velocityX = std::clamp(m_velocityX, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
+
+    int newPos = m_player->playerCurrentX() + m_velocityX * dt;
+
+    newPos = std::clamp(newPos, m_minX, m_windowWidth - m_player->playerWidth());
+    m_player->setPlayerCurrentX(newPos);
+}
+
+void GameController::pauseAllTimers()
+{
+    m_enemyCreationTimer.stop();
+    m_playerMoveTimer.stop();
+    m_collisionTimer.stop();
+
+    m_enemy.stopEnemyFallTimer();
 }
 
 void GameController::checkCollision()
@@ -253,6 +332,8 @@ void GameController::gameReset()
 {
     m_collisionTimer.stop();
     m_enemyCreationTimer.stop();
+    m_playerMoveTimer.stop();
+    m_moveDir = MoveDirection::NONE;
 
     m_gameControllerSettings.setValue("game/highestScore", m_highestScore);
 
@@ -301,7 +382,6 @@ void GameController::setHighestScore(int newHighestScore)
 
 int GameController::level() const
 {
-    qDebug() << "Level " << m_level;
     return m_level;
 }
 
@@ -309,7 +389,19 @@ void GameController::setLevel(int newLevel)
 {
     if (m_level == newLevel)
         return;
-    qDebug() << "Set level " << newLevel;
     m_level = newLevel;
     emit levelChanged();
+}
+
+GameController::GameState GameController::gameState() const
+{
+    return m_gameState;
+}
+
+void GameController::setGameState(GameState newGameState)
+{
+    if (m_gameState == newGameState)
+        return;
+    m_gameState = newGameState;
+    emit gameStateChanged();
 }

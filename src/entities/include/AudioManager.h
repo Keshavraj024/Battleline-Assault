@@ -14,6 +14,7 @@ public:
     void playHit();
     void playGameOver();
     void playShoot();
+    void playClick();
 
     // settings
     void setMuted(bool muted);
@@ -26,6 +27,7 @@ private:
     QSoundEffect m_hitSound;
     QSoundEffect m_gameOverSound;
     QSoundEffect m_shootSound;
+    QSoundEffect m_clickSound;
 
     bool m_muted = false;
 };

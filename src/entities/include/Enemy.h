@@ -65,6 +65,7 @@ private:
 
 private:
     friend class GameController;
+
     void destroyEnemy(Enemy *enemyToDestroy);
     QList<Enemy *> &getEnemyLists();
     void addEnemy();
@@ -72,6 +73,8 @@ private:
     void clearEnemyLists();
     size_t enemyListsSize() const;
     void enemyReset();
+    void stopEnemyFallTimer();
+    void resumeEnemyFallTimer();
 };
 
 #endif // ENEMY_H

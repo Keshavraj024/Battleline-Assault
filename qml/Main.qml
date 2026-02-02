@@ -3,6 +3,8 @@ import QtCore
 import QtQuick.Layouts
 import QtQuick.Controls.Material
 
+import GameEnums 1.0
+
 Window {
     id: root
     width: GameController === null ? 0 : GameController.windowWidth
@@ -31,6 +33,10 @@ Window {
             color: "black"
             opacity: 0.5
         }
+    }
+
+    MenuOverlay {
+        anchors.centerIn: parent
     }
 
     Rectangle {
@@ -123,6 +129,8 @@ Window {
 
     Player {
         id: playerRect
+        focus : (GameController && GameController.gameState === GameStates.RUNNING)
+        visible: (GameController && GameController.gameState === GameStates.RUNNING)
     }
 
     CustomText {

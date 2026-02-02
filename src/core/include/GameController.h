@@ -10,6 +10,7 @@
 #include "Player.h"
 #include "PlayerBullet.h"
 #include "SettingsManager.h"
+#include <qdatetime.h>
 
 class GameController : public QObject
 {
@@ -22,6 +23,8 @@ class GameController : public QObject
     Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged FINAL)
     Q_PROPERTY(int highestScore READ highestScore WRITE setHighestScore NOTIFY highestScoreChanged FINAL)
     Q_PROPERTY(int level READ level WRITE setLevel NOTIFY levelChanged FINAL)
+    Q_PROPERTY(GameController::GameState gameState READ gameState WRITE setGameState NOTIFY
+                   gameStateChanged FINAL)
 
 public:
     explicit GameController(Player *player, QObject *parent = nullptr);
@@ -32,15 +35,26 @@ public:
         NONE
     };
 
-    Q_INVOKABLE void moveLeft();
-    Q_INVOKABLE void moveRight();
+    enum class GameState { STARTING, RUNNING, PAUSED, GAMEOVER };
+    Q_ENUM(GameState)
+
+    Q_INVOKABLE void moveLeftPressed();
+    Q_INVOKABLE void moveRightPressed();
     Q_INVOKABLE void applyBoost();
 
     Q_INVOKABLE void shootBullet();
 
-    Q_INVOKABLE void stopPlayerMoveTimer();
-
     Q_INVOKABLE void initialize();
+
+    Q_INVOKABLE void moveReleased();
+
+    Q_INVOKABLE void startGame();
+    Q_INVOKABLE void pauseGame();
+    Q_INVOKABLE void resumeGame();
+    Q_INVOKABLE void restartGame();
+    Q_INVOKABLE void quitGame();
+
+    Q_INVOKABLE void playClickSound();
 
     double currentX() const;
     void setCurrentX(double newCurrentX);
@@ -75,6 +89,9 @@ public:
     int level() const;
     void setLevel(int newLevel);
 
+    GameState gameState() const;
+    void setGameState(GameState newGameState);
+
 signals:
     void currentXChanged();
     void currentYChanged();
@@ -99,6 +116,8 @@ signals:
 
     void levelChanged();
 
+    void gameStateChanged();
+
 private slots:
     void applyGravity();
     void updatePlayerMovement();
@@ -122,6 +141,8 @@ private:
     QTimer m_playerMoveTimer;
     QTimer m_bulletCreationTimer;
 
+    QVector<QTimer> m_timerVector;
+
     QQmlListProperty<PlayerBullet> m_bullets;
 
     PlayerBullet m_bullet;
@@ -134,6 +155,10 @@ private:
 
     Player *m_player;
 
+    qreal m_velocityX;
+    QElapsedTimer m_elapsedTimer;
+
+    void pauseAllTimers();
 
 private:
     void checkCollision();
@@ -141,6 +166,7 @@ private:
     void checkEnemyPlayerCollision();
     void gameReset();
     void updateScore();
+    GameState m_gameState{GameState::STARTING};
 };
 
 #endif // GAMECONTROLLER_H

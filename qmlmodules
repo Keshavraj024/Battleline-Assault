@@ -7,6 +7,9 @@ qt_add_qml_module(appBattleline_Assault
         qml/Enemy.qml
         qml/Player.qml
         qml/CustomText.qml
+        qml/MenuOverlay.qml
+
+        qml/Components/MainMenuButton.qml
    RESOURCES
         qml/Assets/Enemies/AbyssalHexcrawler.png
         qml/Assets/Enemies/AshmawSpectralite.png
@@ -20,12 +23,19 @@ qt_add_qml_module(appBattleline_Assault
         qml/Assets/Enemies/PyrothorSovereign.png
         qml/Assets/Enemies/VoidclawIncinerator.png
         qml/Assets/Enemies/VoidreaverStrix.png
+
         qml/Assets/Player/Skyfire.png
         qml/Assets/Player/flame_flicker.gif
+
         qml/Assets/Fonts/Doto-Bold.ttf
         qml/Assets/Fonts/Doto-ExtraBold.ttf
+        qml/Assets/Fonts/PressStart2P-Regular.ttf
+
         qml/Assets/bgImg_1.png
+
         qml/Assets/Sounds/hit.wav
         qml/Assets/Sounds/shoot.wav
         qml/Assets/Sounds/game_over.wav
+        qml/Assets/Sounds/click.wav
+
 )

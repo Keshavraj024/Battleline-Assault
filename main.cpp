@@ -3,7 +3,6 @@
 #include <QQmlContext>
 #include "GameController.h"
 #include "Player.h"
-#include "SettingsManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +13,12 @@ int main(int argc, char *argv[])
     Player *player = new Player(&app);
 
     GameController gameController(player, &app);
+
+    qmlRegisterUncreatableType<GameController>("GameEnums",
+                                               1,
+                                               0,
+                                               "GameStates",
+                                               "Cannot create GameController in QML");
 
     engine.rootContext()->setContextProperty("GameController", &gameController);
 
