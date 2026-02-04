@@ -68,6 +68,8 @@ private:
     void clearBulletLists();
     size_t bulletListsSize() const;
     void bulletReset();
+    void stopBulletFallTimer();
+    void resumeBulletFallTimer();
 };
 
 #endif // PLAYERBULLET_H

@@ -6,36 +6,38 @@ qt_add_qml_module(appBattleline_Assault
         qml/PlayerBullet.qml
         qml/Enemy.qml
         qml/Player.qml
-        qml/CustomText.qml
         qml/MenuOverlay.qml
 
         qml/Components/MainMenuButton.qml
+        qml/Components/GameHUD.qml
+
+        qml/Customs/CustomText.qml
    RESOURCES
-        qml/Assets/Enemies/AbyssalHexcrawler.png
-        qml/Assets/Enemies/AshmawSpectralite.png
-        qml/Assets/Enemies/BlazefangOverseer.png
-        qml/Assets/Enemies/CindervoidRavager.png
-        qml/Assets/Enemies/EmberclawRavager.png
-        qml/Assets/Enemies/InfernicTalonspawn.png
-        qml/Assets/Enemies/IronbaneSkitterlord.png
-        qml/Assets/Enemies/NetherfangSentinel.png
-        qml/Assets/Enemies/PyroniteWarDrone.png
-        qml/Assets/Enemies/PyrothorSovereign.png
-        qml/Assets/Enemies/VoidclawIncinerator.png
-        qml/Assets/Enemies/VoidreaverStrix.png
+       qml/Assets/Enemies/AbyssalHexcrawler.png
+       qml/Assets/Enemies/AshmawSpectralite.png
+       qml/Assets/Enemies/BlazefangOverseer.png
+       qml/Assets/Enemies/CindervoidRavager.png
+       qml/Assets/Enemies/EmberclawRavager.png
+       qml/Assets/Enemies/InfernicTalonspawn.png
+       qml/Assets/Enemies/IronbaneSkitterlord.png
+       qml/Assets/Enemies/NetherfangSentinel.png
+       qml/Assets/Enemies/PyroniteWarDrone.png
+       qml/Assets/Enemies/PyrothorSovereign.png
+       qml/Assets/Enemies/VoidclawIncinerator.png
+       qml/Assets/Enemies/VoidreaverStrix.png
 
-        qml/Assets/Player/Skyfire.png
-        qml/Assets/Player/flame_flicker.gif
+       qml/Assets/Player/Skyfire.png
+       qml/Assets/Player/flame_flicker.gif
 
-        qml/Assets/Fonts/Doto-Bold.ttf
-        qml/Assets/Fonts/Doto-ExtraBold.ttf
-        qml/Assets/Fonts/PressStart2P-Regular.ttf
+       qml/Assets/Fonts/Doto-Bold.ttf
+       qml/Assets/Fonts/Doto-ExtraBold.ttf
+       qml/Assets/Fonts/PressStart2P-Regular.ttf
 
-        qml/Assets/bgImg_1.png
+       qml/Assets/bgImg_1.png
 
-        qml/Assets/Sounds/hit.wav
-        qml/Assets/Sounds/shoot.wav
-        qml/Assets/Sounds/game_over.wav
-        qml/Assets/Sounds/click.wav
+       qml/Assets/Sounds/hit.wav
+       qml/Assets/Sounds/shoot.wav
+       qml/Assets/Sounds/game_over.wav
+       qml/Assets/Sounds/click.wav
 
 )

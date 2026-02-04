@@ -16,7 +16,6 @@ GameController::GameController(Player *player, QObject *parent)
     : QObject{parent}
     , m_player(player)
 {
-    // initialize();
     m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
     m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
 
@@ -36,11 +35,6 @@ GameController::GameController(Player *player, QObject *parent)
 
     connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
     m_playerMoveTimer.setInterval(16);
-
-    // m_timerVector.push_back(m_enemyCreationTimer);
-    // m_timerVector.push_back(m_playerMoveTimer);
-    // m_timerVector.push_back(m_collisionTimer);
-    // m_timerVector.push_back(m_elapsedTimer);
 }
 
 void GameController::initialize()
@@ -91,6 +85,7 @@ void GameController::resumeGame()
         m_collisionTimer.start();
 
         m_enemy.resumeEnemyFallTimer();
+        m_bullet.resumeBulletFallTimer();
 
         setGameState(GameState::RUNNING);
     }
@@ -221,6 +216,7 @@ void GameController::pauseAllTimers()
     m_collisionTimer.stop();
 
     m_enemy.stopEnemyFallTimer();
+    m_bullet.stopBulletFallTimer();
 }
 
 void GameController::checkCollision()
@@ -320,7 +316,7 @@ void GameController::checkEnemyPlayerCollision()
         if (enemy->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
             enemyToDestroy = enemy;
             m_audioManager.playGameOver();
-            emit gameOver();
+            setGameState(GameState::GAMEOVER);
             gameReset();
             break;
         }
@@ -330,9 +326,12 @@ void GameController::checkEnemyPlayerCollision()
 
 void GameController::gameReset()
 {
-    m_collisionTimer.stop();
-    m_enemyCreationTimer.stop();
-    m_playerMoveTimer.stop();
+    setScore(0);
+    setLevel(1);
+
+    // m_collisionTimer.stop();
+    // m_enemyCreationTimer.stop();
+    // m_playerMoveTimer.stop();
     m_moveDir = MoveDirection::NONE;
 
     m_gameControllerSettings.setValue("game/highestScore", m_highestScore);

@@ -102,6 +102,18 @@ void PlayerBullet::bulletReset()
     }
 }
 
+void PlayerBullet::stopBulletFallTimer()
+{
+    for (auto &bullet : m_bulletLists)
+        bullet->m_timer.stop();
+}
+
+void PlayerBullet::resumeBulletFallTimer()
+{
+    for (auto &bullet : m_bulletLists)
+        bullet->m_timer.start();
+}
+
 int PlayerBullet::bulletWidth() const
 {
     return m_bulletWidth;

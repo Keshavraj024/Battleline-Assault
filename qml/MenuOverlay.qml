@@ -18,6 +18,8 @@ Item {
         source : "Assets/Fonts/PressStart2P-Regular.ttf"
     }
 
+    Component.onCompleted: console.log(GameController.gameState)
+
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -51,9 +53,10 @@ Item {
             Layout.alignment: Qt.AlignHCenter
 
             labelText: "Restart"
-            visible: GameController && GameController.gameState !== GameStates.RUNNING
+            visible: GameController && GameController.gameState === GameStates.PAUSED
             onActionTriggered: function() {
                 GameController.restartGame()
+
             }
         }
 

@@ -5,6 +5,11 @@ project(Battleline_Assault VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(QT_NO_CACHEGEN ON) # Disables the QML cache generator
+    set(QT_NO_QUICK_COMPILER ON) # Disables the QML compiler
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.8)

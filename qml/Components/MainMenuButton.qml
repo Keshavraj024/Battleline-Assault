@@ -23,6 +23,7 @@ Button {
         font.weight: menuFontLoader.font.weight
         font.styleName: menuFontLoader.font.styleName
         font.pixelSize: 24
+
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
 
@@ -34,8 +35,7 @@ Button {
         scale: mainMenuButton.hovered ? 1.1 : 1.0
         color: mainMenuButton.hovered ? mainMenuButton.hoverColor : mainMenuButton.normalColor
         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-        Behavior on color { NumberAnimation { duration: 150}}
-
+        Behavior on color {ColorAnimation { duration: 200 }}
     }
 
     onClicked: function() {
@@ -43,7 +43,9 @@ Button {
     }
 
     onHoveredChanged: function() {
-        if(hovered && GameController)
+        if(hovered && GameController) {
             GameController.playClickSound()
+        }
+
     }
 }

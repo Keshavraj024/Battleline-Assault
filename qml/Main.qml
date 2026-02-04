@@ -4,17 +4,24 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material
 
 import GameEnums 1.0
+import "Components"
 
 Window {
     id: root
-    width: GameController === null ? 0 : GameController.windowWidth
-    height: GameController === null ? 0 : GameController.windowHeight
+    width: GameController?.windowWidth ?? 0
+    height: GameController?.windowHeight ?? 0
     visible: true
     title: qsTr("Battleline Assault")
 
-    property int score : GameController === null ? 0 : GameController.score
-    property int highestScore : GameController === null ? 0 : GameController.highestScore
-    property int gameLevel: GameController === null ? 0 : GameController.level
+    property int score : GameController?.score ?? 0
+    property int highestScore : GameController?.highestScore ?? 0
+    property int gameLevel: GameController?.level ?? 0
+
+    property var bullets: GameController?.bullets ?? 0
+    property var enemies: GameController?.enemies ?? 0
+
+    property bool isGameRunning: (GameController?.gameState === GameStates.RUNNING) ?? false
+    property bool isGameOver: (GameController?.gameState === GameStates.GAMEOVER) ?? false
 
     FontLoader {
         id: fontLoader
@@ -36,6 +43,7 @@ Window {
     }
 
     MenuOverlay {
+        id: menuOverlay
         anchors.centerIn: parent
     }
 
@@ -44,7 +52,7 @@ Window {
         anchors.fill: parent
         color: "black"
         opacity: 0.8
-        visible: false
+        visible: root.isGameOver
 
         ColumnLayout {
             id: gameOverLayout
@@ -87,7 +95,7 @@ Window {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
 
-                    text: "Close"
+                    text: "Quit"
 
                     font.family: fontLoader.font.family
                     font.weight: fontLoader.font.weight
@@ -102,7 +110,7 @@ Window {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
 
-                    text: "Restart"
+                    text: "Main Menu"
 
                     font.family: fontLoader.font.family
                     font.weight: fontLoader.font.weight
@@ -111,73 +119,40 @@ Window {
 
                     onClicked: {
                         gameOverRect.visible = false
-                        playerRect.focus = true
-                        GameController.initialize()
+                        GameController.gameState = GameStates.STARTING
                     }
                 }
             }
         }
+    }
 
-        Connections {
-            target: GameController
-            function onGameOver() {
-                gameOverRect.visible = true
-                playerRect.focus = false
-            }
+    GameHUD {
+        anchors {
+            left: parent.left
+            top: parent.top
+            margins: 10
         }
+        score: root.score
+        highestScore: root.highestScore
+        gameLevel: root.gameLevel
+        isGameRunning: root.isGameRunning
     }
 
     Player {
         id: playerRect
-        focus : (GameController && GameController.gameState === GameStates.RUNNING)
-        visible: (GameController && GameController.gameState === GameStates.RUNNING)
+        focus : root.isGameRunning
+        visible: root.isGameRunning
     }
 
-    CustomText {
-        id: scoreBoard
-
-        customText: "Score : " + root.score
-
-        anchors {
-            left: parent.left
-            leftMargin: 5
-            top: parent.top
-            topMargin: 5
-        }
-    }
-
-    CustomText {
-        id: highestScoreBoard
-        customText: "Highest Score : " + root.highestScore
-
-        anchors {
-            left: parent.left
-            leftMargin: 5
-            top: scoreBoard.bottom
-            topMargin: 5
-        }
-    }
-
-    CustomText {
-        id: levelBoard
-        customText: "Level : " + root.gameLevel
-
-        anchors {
-            left: parent.left
-            leftMargin: 5
-            top: highestScoreBoard.bottom
-            topMargin: 10
-        }
-    }
 
     Repeater {
-        model: GameController === null ? 0 : GameController.bullets
+        model: root.bullets
         delegate: PlayerBullet {
         }
     }
 
     Repeater {
-        model: GameController === null ? 0 : GameController.enemies
+        model: root.enemies
         delegate: Enemy {
         }
     }
