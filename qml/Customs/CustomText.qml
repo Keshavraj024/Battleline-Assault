@@ -4,12 +4,13 @@ Text {
     id: parent
 
     required property string customText
+    required property FontLoader fontName
 
     text: parent.customText
     color: "white"
 
-    font.family: fontLoader.font.family
-    font.weight: fontLoader.font.weight
-    font.styleName: fontLoader.font.styleName
+    font.family: fontName.font.family
+    font.weight: fontName.font.weight
+    font.styleName: fontName.font.styleName
     font.pixelSize: 24
 }

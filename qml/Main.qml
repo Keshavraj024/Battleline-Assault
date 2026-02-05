@@ -23,12 +23,6 @@ Window {
     property bool isGameRunning: (GameController?.gameState === GameStates.RUNNING) ?? false
     property bool isGameOver: (GameController?.gameState === GameStates.GAMEOVER) ?? false
 
-    FontLoader {
-        id: fontLoader
-        source : "Assets/Fonts/Doto-ExtraBold.ttf"
-    }
-
-
     Image {
         id: backgroundImage
         anchors.fill: parent
@@ -53,6 +47,12 @@ Window {
         color: "black"
         opacity: 0.8
         visible: root.isGameOver
+
+        FontLoader {
+            id: fontLoader
+            source : "Assets/Fonts/Doto-ExtraBold.ttf"
+        }
+
 
         ColumnLayout {
             id: gameOverLayout
@@ -118,7 +118,6 @@ Window {
                     font.pixelSize: 24
 
                     onClicked: {
-                        gameOverRect.visible = false
                         GameController.gameState = GameStates.STARTING
                     }
                 }

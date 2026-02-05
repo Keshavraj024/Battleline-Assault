@@ -4,6 +4,7 @@ import QtQuick.Controls.Material
 
 import GameEnums 1.0
 import "Components"
+import "Customs"
 
 Item {
     id: menuItem
@@ -11,25 +12,36 @@ Item {
     width: 200
     height: 1.5 * menuItem.width
 
-    visible: GameController && GameController.gameState !== GameStates.RUNNING
+    property bool isRunning: GameController?.gameState === GameStates.RUNNING ?? false
+    property bool isGameOver: GameController?.gameState === GameStates.GAMEOVER ?? false
+    property bool isStarting: GameController?.gameState === GameStates.STARTING ?? false
+    property bool isPaused: GameController?.gameState === GameStates.PAUSED ?? false
+
+    visible: !isRunning && !isGameOver
 
     FontLoader {
         id: menuFontLoader
         source : "Assets/Fonts/PressStart2P-Regular.ttf"
     }
 
-    Component.onCompleted: console.log(GameController.gameState)
-
 
     ColumnLayout {
         anchors.centerIn: parent
+
+        CustomText {
+            id: gameTitle
+            customText: "BATTLELINE ASSAULT"
+            fontName: menuFontLoader
+            font.pixelSize: 52
+            Layout.alignment: Qt.AlignHCenter
+        }
 
         MainMenuButton {
             id: playButton
             Layout.alignment: Qt.AlignHCenter
 
             labelText: "Play"
-            visible: GameController && GameController.gameState === GameStates.STARTING
+            visible: isStarting
             onActionTriggered: function() {
                 GameController.startGame()
             }
@@ -41,7 +53,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
 
             labelText: "Resume"
-            visible: GameController && GameController.gameState === GameStates.PAUSED
+            visible: isPaused
             onActionTriggered: function() {
                 GameController.resumeGame()
             }
@@ -53,7 +65,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
 
             labelText: "Restart"
-            visible: GameController && GameController.gameState === GameStates.PAUSED
+            visible: isPaused
             onActionTriggered: function() {
                 GameController.restartGame()
 

@@ -329,9 +329,9 @@ void GameController::gameReset()
     setScore(0);
     setLevel(1);
 
-    // m_collisionTimer.stop();
-    // m_enemyCreationTimer.stop();
-    // m_playerMoveTimer.stop();
+    m_collisionTimer.stop();
+    m_enemyCreationTimer.stop();
+    m_playerMoveTimer.stop();
     m_moveDir = MoveDirection::NONE;
 
     m_gameControllerSettings.setValue("game/highestScore", m_highestScore);
