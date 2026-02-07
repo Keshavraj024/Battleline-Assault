@@ -11,7 +11,7 @@ constexpr int MIN_INTERVAL = 200;
 constexpr qreal PLAYER_MAX_SPEED = 500.0;
 constexpr qreal PLAYER_ACCL = 3000.0;
 constexpr qreal PLAYER_FRICTION = 2500.0;
-constexpr int FRAME_COUNT = 120;
+constexpr int FRAME_COUNT_PER_SEC = 60;
 
 GameController::GameController(Player *player, QObject *parent)
     : QObject{parent}
@@ -25,19 +25,8 @@ GameController::GameController(Player *player, QObject *parent)
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
     m_thrustTimer.setInterval(16);
 
-    // connect(&m_enemyCreationTimer, &QTimer::timeout, this, [this]() {
-    //     m_enemyManager->spawnEnemy(m_windowWidth);
-    // });
-    // m_enemyCreationTimer.setInterval(BASE_INTERVAL);
-
-    // connect(&m_collisionTimer, &QTimer::timeout, this, &GameController::checkCollision);
-    // m_collisionTimer.setInterval(16);
-
-    // connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
-    // m_playerMoveTimer.setInterval(16);
-
     connect(&m_gameTimer, &QTimer::timeout, this, &GameController::gameTick);
-    m_gameTimer.start(16);
+    m_gameTimer.setInterval(16);
 
     m_enemyManager = new EnemyManager(this);
 }
@@ -47,8 +36,6 @@ void GameController::gameTick()
     checkCollision();
     updatePlayerMovement();
 
-    qDebug() << "Is up key pressed " << m_KeyUpPressed;
-
     if (m_KeyUpPressed) {
         applyBoost();
     }
@@ -56,7 +43,7 @@ void GameController::gameTick()
     static int frameRate = 0;
     frameRate++;
 
-    if ((frameRate % FRAME_COUNT) == 0) {
+    if ((frameRate % int(FRAME_COUNT_PER_SEC * m_spawnEnemyIntervalInSec)) == 0) {
         m_enemyManager->spawnEnemy(m_windowWidth);
         frameRate = 0;
     }
@@ -64,10 +51,7 @@ void GameController::gameTick()
 
 void GameController::initialize()
 {
-    m_enemyCreationTimer.start();
-    m_playerMoveTimer.start();
-    m_collisionTimer.start();
-
+    m_gameTimer.start();
     m_elapsedTimer.start();
 
     setScore(0);
@@ -95,17 +79,12 @@ void GameController::startGame()
 void GameController::togglePause()
 {
     if (m_gameState == GameState::RUNNING) {
-        m_enemyCreationTimer.stop();
-        m_playerMoveTimer.stop();
-        m_collisionTimer.stop();
+        m_gameTimer.stop();
 
         m_enemyManager->togglePause(true);
         setGameState(GameState::PAUSED);
     } else if (m_gameState == GameState::PAUSED) {
-        m_enemyCreationTimer.start();
-        m_playerMoveTimer.start();
-        m_collisionTimer.start();
-
+        m_gameTimer.start();
         m_enemyManager->togglePause(false);
         m_bullet.resumeBulletFallTimer();
 
@@ -240,16 +219,6 @@ void GameController::updatePlayerMovement()
     m_player->setPlayerCurrentX(newPos);
 }
 
-void GameController::pauseAllTimers()
-{
-    m_enemyCreationTimer.stop();
-    m_playerMoveTimer.stop();
-    m_collisionTimer.stop();
-
-    m_enemyManager->togglePause(true);
-    m_bullet.stopBulletFallTimer();
-}
-
 void GameController::checkCollision()
 {
     checkBulletEnemyCollision();
@@ -277,10 +246,10 @@ void GameController::updateScore()
 {
     setScore(m_score + SCORE_PER_KILL);
 
-    if (m_score % LEVEL_UP_ENTRY == 0) {
+    if (m_score % 10 == 0) {
         setLevel(m_level + 1);
-        auto setInterval = std::max(200, BASE_INTERVAL - (DECREASE_PER_LEVEL * m_level));
-        m_enemyCreationTimer.setInterval(setInterval);
+        m_spawnEnemyIntervalInSec = (std::max(200, BASE_INTERVAL - (DECREASE_PER_LEVEL * m_level)))
+                                    / 1000.f;
     }
 
     if (m_score > m_highestScore)
@@ -335,8 +304,6 @@ void GameController::checkEnemyPlayerCollision()
                       static_cast<qreal>(m_player->playerWidth()),
                       static_cast<qreal>(m_player->playerHeight())};
 
-    int enemyIndexToRemove;
-
     for (size_t enemyIdx = 0; enemyIdx < enemies.size(); enemyIdx++) {
         QRectF enemyRect{enemies[enemyIdx]->enemyX(),
                          enemies[enemyIdx]->enemyY(),
@@ -344,21 +311,18 @@ void GameController::checkEnemyPlayerCollision()
                          static_cast<qreal>(enemies[enemyIdx]->enemyHeight())};
 
         if (enemies[enemyIdx]->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
-            enemyIndexToRemove = enemyIdx;
             m_audioManager.playGameOver();
             setGameState(GameState::GAMEOVER);
             gameReset();
             break;
         }
     }
-    m_enemyManager->removeEnemy(enemyIndexToRemove);
 }
 
 void GameController::gameReset()
 {
-    m_collisionTimer.stop();
-    m_enemyCreationTimer.stop();
-    m_playerMoveTimer.stop();
+    m_gameTimer.stop();
+
     m_moveDir = MoveDirection::NONE;
 
     m_gameControllerSettings.setValue("game/highestScore", m_highestScore);

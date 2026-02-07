@@ -139,9 +139,7 @@ private:
     QTimer m_gameTimer;
 
     QTimer m_thrustTimer;
-    QTimer m_enemyCreationTimer;
-    QTimer m_collisionTimer;
-    QTimer m_playerMoveTimer;
+
     QTimer m_bulletCreationTimer;
 
     QQmlListProperty<Bullet> m_bullets;
@@ -161,11 +159,11 @@ private:
     qreal m_velocityX;
     QElapsedTimer m_elapsedTimer;
 
-    void pauseAllTimers();
-
     EnemyManager *enemyManager() const { return m_enemyManager; }
 
     bool m_KeyUpPressed{false};
+
+    float m_spawnEnemyIntervalInSec{6};
 
 private:
     void checkCollision();

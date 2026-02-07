@@ -69,43 +69,6 @@ void Enemy::setEnemyHeight(int newEnemyHeight)
     emit enemyHeightChanged();
 }
 
-// bool Enemy::IsEmpty() const
-// {
-//     return m_enemyList.empty();
-// }
-
-// void Enemy::clearEnemyLists()
-// {
-//     m_enemyList.clear();
-// }
-
-// size_t Enemy::enemyListsSize() const
-// {
-//     return m_enemyList.size();
-// }
-
-// void Enemy::enemyReset()
-// {
-//     if (!IsEmpty()) {
-//         foreach (Enemy *enemy, m_enemyList) {
-//             delete enemy;
-//         }
-//         clearEnemyLists();
-//     }
-// }
-
-// void Enemy::stopEnemyFallTimer()
-// {
-//     for (auto &enemy : m_enemyList)
-//         enemy->m_enemyFalltimer.stop();
-// }
-
-// void Enemy::resumeEnemyFallTimer()
-// {
-//     for (auto &enemy : m_enemyList)
-//         enemy->m_enemyFalltimer.start();
-// }
-
 QString Enemy::imageSource() const
 {
     return m_imageSource;

@@ -33,7 +33,7 @@ private:
     QList<Enemy *> m_enemyLists;
 
     QTimer *m_updateTimer;
-    float m_enemyFallSpeed{5.f};
+    float m_enemyFallSpeed{0.8f};
 
     // QAbstractItemModel interface
 private slots:
