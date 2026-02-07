@@ -1,14 +1,14 @@
-#include "PlayerBullet.h"
+#include "Bullet.h"
 
-PlayerBullet::PlayerBullet(QObject *parent)
+Bullet::Bullet(QObject *parent)
     : QObject{parent}
 {
     initialize();
-    connect(&m_timer, &QTimer::timeout, this, &PlayerBullet::updateBulletPos);
+    connect(&m_timer, &QTimer::timeout, this, &Bullet::updateBulletPos);
     m_timer.start(16);
 }
 
-void PlayerBullet::initialize()
+void Bullet::initialize()
 {
     double playerWidth = m_gameControllerSettings.getValue("player/width").toInt();
 
@@ -22,12 +22,12 @@ void PlayerBullet::initialize()
     m_bulletY = playerStartY - m_bulletHeight;
 }
 
-double PlayerBullet::bulletX() const
+double Bullet::bulletX() const
 {
     return m_bulletX;
 }
 
-void PlayerBullet::setBulletX(double newBulletX)
+void Bullet::setBulletX(double newBulletX)
 {
     if (qFuzzyCompare(m_bulletX, newBulletX))
         return;
@@ -35,12 +35,12 @@ void PlayerBullet::setBulletX(double newBulletX)
     emit bulletXChanged();
 }
 
-double PlayerBullet::bulletY() const
+double Bullet::bulletY() const
 {
     return m_bulletY;
 }
 
-void PlayerBullet::setBulletY(double newBulletY)
+void Bullet::setBulletY(double newBulletY)
 {
     if (qFuzzyCompare(m_bulletY, newBulletY))
         return;
@@ -48,14 +48,14 @@ void PlayerBullet::setBulletY(double newBulletY)
     emit bulletYChanged();
 }
 
-void PlayerBullet::updateBulletPos()
+void Bullet::updateBulletPos()
 {
     setBulletY(m_bulletY - m_ySpeed);
     if(m_bulletY < -m_bulletHeight)
         emit bulletOutofWindow(this);
 }
 
-void PlayerBullet::destroyBullet(PlayerBullet *bulletToDestroy)
+void Bullet::destroyBullet(Bullet *bulletToDestroy)
 {
     auto index = m_bulletLists.indexOf(bulletToDestroy);
     if (index != -1) {
@@ -65,61 +65,61 @@ void PlayerBullet::destroyBullet(PlayerBullet *bulletToDestroy)
     }
 }
 
-QList<PlayerBullet *> &PlayerBullet::getBulletLists()
+QList<Bullet *> &Bullet::getBulletLists()
 {
     return m_bulletLists;
 }
 
-void PlayerBullet::addBullet()
+void Bullet::addBullet()
 {
-    PlayerBullet *newBullet = new PlayerBullet();
-    connect(newBullet, &PlayerBullet::bulletOutofWindow, this, &PlayerBullet::destroyBullet);
+    Bullet *newBullet = new Bullet();
+    connect(newBullet, &Bullet::bulletOutofWindow, this, &Bullet::destroyBullet);
     m_bulletLists.append(newBullet);
 }
 
-bool PlayerBullet::IsEmpty() const
+bool Bullet::IsEmpty() const
 {
     return m_bulletLists.empty();
 }
 
-void PlayerBullet::clearBulletLists()
+void Bullet::clearBulletLists()
 {
     m_bulletLists.clear();
 }
 
-size_t PlayerBullet::bulletListsSize() const
+size_t Bullet::bulletListsSize() const
 {
     return m_bulletLists.size();
 }
 
-void PlayerBullet::bulletReset()
+void Bullet::bulletReset()
 {
     if (!IsEmpty()) {
-        foreach (PlayerBullet *bullet, m_bulletLists) {
+        foreach (Bullet *bullet, m_bulletLists) {
             delete bullet;
         }
         clearBulletLists();
     }
 }
 
-void PlayerBullet::stopBulletFallTimer()
+void Bullet::stopBulletFallTimer()
 {
     for (auto &bullet : m_bulletLists)
         bullet->m_timer.stop();
 }
 
-void PlayerBullet::resumeBulletFallTimer()
+void Bullet::resumeBulletFallTimer()
 {
     for (auto &bullet : m_bulletLists)
         bullet->m_timer.start();
 }
 
-int PlayerBullet::bulletWidth() const
+int Bullet::bulletWidth() const
 {
     return m_bulletWidth;
 }
 
-void PlayerBullet::setBulletWidth(int newBulletWidth)
+void Bullet::setBulletWidth(int newBulletWidth)
 {
     if (m_bulletWidth == newBulletWidth)
         return;
@@ -127,12 +127,12 @@ void PlayerBullet::setBulletWidth(int newBulletWidth)
     emit bulletWidthChanged();
 }
 
-int PlayerBullet::bulletHeight() const
+int Bullet::bulletHeight() const
 {
     return m_bulletHeight;
 }
 
-void PlayerBullet::setBulletHeight(int newBulletHeight)
+void Bullet::setBulletHeight(int newBulletHeight)
 {
     if (m_bulletHeight == newBulletHeight)
         return;

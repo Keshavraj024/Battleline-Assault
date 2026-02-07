@@ -6,6 +6,8 @@ import QtQuick.Controls.Material
 import GameEnums 1.0
 import "Components"
 
+import Battleline_Assault 1.0
+
 Window {
     id: root
     width: GameController?.windowWidth ?? 0
@@ -22,12 +24,12 @@ Window {
 
     property bool isGameRunning: (GameController?.gameState === GameStates.RUNNING) ?? false
     property bool isGameOver: (GameController?.gameState === GameStates.GAMEOVER) ?? false
+    property bool isGameStarting: (GameController?.gameState === GameStates.STARTING) ?? false
 
     Image {
         id: backgroundImage
         anchors.fill: parent
-        // fillMode: Image.PreserveAspectFit
-        source : "Assets/bgImg_1.png"
+        source : "qrc:/qml/Assets/bgImg_1.png"
         Rectangle {
             id: backgroundRect
             anchors.fill: backgroundImage
@@ -39,6 +41,8 @@ Window {
     MenuOverlay {
         id: menuOverlay
         anchors.centerIn: parent
+        visible: !isGameRunning && !isGameOver
+        focus: !isGameRunning
     }
 
     Rectangle {
@@ -50,7 +54,7 @@ Window {
 
         FontLoader {
             id: fontLoader
-            source : "Assets/Fonts/Doto-ExtraBold.ttf"
+            source : "qrc:/qml/Assets/Fonts/Doto-ExtraBold.ttf"
         }
 
 
@@ -135,23 +139,25 @@ Window {
         highestScore: root.highestScore
         gameLevel: root.gameLevel
         isGameRunning: root.isGameRunning
+
+        visible: !root.isGameStarting && !root.isGameOver
     }
 
     Player {
         id: playerRect
         focus : root.isGameRunning
-        visible: root.isGameRunning
+        visible: !root.isGameStarting && !root.isGameOver
     }
 
 
     Repeater {
         model: root.bullets
-        delegate: PlayerBullet {
+        delegate: Bullet {
         }
     }
 
     Repeater {
-        model: root.enemies
+        model: GameController?.enemyManager
         delegate: Enemy {
         }
     }

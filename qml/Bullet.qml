@@ -10,7 +10,7 @@ Item {
     AnimatedImage {
         id: fireGif
         anchors.fill: parent
-        source: "Assets/Player/flame_flicker.gif"
+        source: "qrc:/qml/Assets/Player/flame_flicker.gif"
         sourceSize: "50x30"
     }
 }

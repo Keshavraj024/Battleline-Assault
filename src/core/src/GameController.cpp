@@ -11,6 +11,7 @@ constexpr int MIN_INTERVAL = 200;
 constexpr qreal PLAYER_MAX_SPEED = 500.0;
 constexpr qreal PLAYER_ACCL = 3000.0;
 constexpr qreal PLAYER_FRICTION = 2500.0;
+constexpr int FRAME_COUNT = 120;
 
 GameController::GameController(Player *player, QObject *parent)
     : QObject{parent}
@@ -24,31 +25,53 @@ GameController::GameController(Player *player, QObject *parent)
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
     m_thrustTimer.setInterval(16);
 
-    connect(&m_enemyCreationTimer, &QTimer::timeout, this, [this]() {
-        m_enemy.addEnemy();
-        emit enemiesChanged();
-    });
-    m_enemyCreationTimer.setInterval(BASE_INTERVAL);
+    // connect(&m_enemyCreationTimer, &QTimer::timeout, this, [this]() {
+    //     m_enemyManager->spawnEnemy(m_windowWidth);
+    // });
+    // m_enemyCreationTimer.setInterval(BASE_INTERVAL);
 
-    connect(&m_collisionTimer, &QTimer::timeout, this, &GameController::checkCollision);
-    m_collisionTimer.setInterval(16);
+    // connect(&m_collisionTimer, &QTimer::timeout, this, &GameController::checkCollision);
+    // m_collisionTimer.setInterval(16);
 
-    connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
-    m_playerMoveTimer.setInterval(16);
+    // connect(&m_playerMoveTimer, &QTimer::timeout, this, &GameController::updatePlayerMovement);
+    // m_playerMoveTimer.setInterval(16);
+
+    connect(&m_gameTimer, &QTimer::timeout, this, &GameController::gameTick);
+    m_gameTimer.start(16);
+
+    m_enemyManager = new EnemyManager(this);
+}
+
+void GameController::gameTick()
+{
+    checkCollision();
+    updatePlayerMovement();
+
+    qDebug() << "Is up key pressed " << m_KeyUpPressed;
+
+    if (m_KeyUpPressed) {
+        applyBoost();
+    }
+
+    static int frameRate = 0;
+    frameRate++;
+
+    if ((frameRate % FRAME_COUNT) == 0) {
+        m_enemyManager->spawnEnemy(m_windowWidth);
+        frameRate = 0;
+    }
 }
 
 void GameController::initialize()
 {
-    // for (auto &timer : m_timerVector)
-    //     timer.start();
     m_enemyCreationTimer.start();
     m_playerMoveTimer.start();
     m_collisionTimer.start();
 
     m_elapsedTimer.start();
 
-    setScore(m_score);
-    setLevel(m_level);
+    setScore(0);
+    setLevel(1);
 
     m_player->initialize();
 
@@ -69,22 +92,21 @@ void GameController::startGame()
     initialize();
 }
 
-void GameController::pauseGame()
+void GameController::togglePause()
 {
     if (m_gameState == GameState::RUNNING) {
-        pauseAllTimers();
-        setGameState(GameState::PAUSED);
-    }
-}
+        m_enemyCreationTimer.stop();
+        m_playerMoveTimer.stop();
+        m_collisionTimer.stop();
 
-void GameController::resumeGame()
-{
-    if (m_gameState == GameState::PAUSED) {
+        m_enemyManager->togglePause(true);
+        setGameState(GameState::PAUSED);
+    } else if (m_gameState == GameState::PAUSED) {
         m_enemyCreationTimer.start();
         m_playerMoveTimer.start();
         m_collisionTimer.start();
 
-        m_enemy.resumeEnemyFallTimer();
+        m_enemyManager->togglePause(false);
         m_bullet.resumeBulletFallTimer();
 
         setGameState(GameState::RUNNING);
@@ -105,6 +127,15 @@ void GameController::quitGame()
 void GameController::playClickSound()
 {
     m_audioManager.playClick();
+}
+
+void GameController::setPressed(bool pressed)
+{
+    m_KeyUpPressed = pressed;
+
+    if (m_KeyUpPressed && !m_thrustTimer.isActive()) {
+        m_thrustTimer.start();
+    }
 }
 
 void GameController::moveLeftPressed()
@@ -215,7 +246,7 @@ void GameController::pauseAllTimers()
     m_playerMoveTimer.stop();
     m_collisionTimer.stop();
 
-    m_enemy.stopEnemyFallTimer();
+    m_enemyManager->togglePause(true);
     m_bullet.stopBulletFallTimer();
 }
 
@@ -225,7 +256,7 @@ void GameController::checkCollision()
     checkEnemyPlayerCollision();
 }
 
-bool isCollided(PlayerBullet *bullet, Enemy *enemy)
+bool isCollided(Bullet *bullet, Enemy *enemy)
 {
     QRectF bulletRect{bullet->bulletX(),
                       bullet->bulletY(),
@@ -259,42 +290,41 @@ void GameController::updateScore()
 void GameController::checkBulletEnemyCollision()
 {
     auto &bullets = m_bullet.getBulletLists();
-    auto &enemies = m_enemy.getEnemyLists();
+    auto &enemies = m_enemyManager->getEnemiesList();
 
     if (bullets.empty() || enemies.empty())
         return;
 
-    QVector<PlayerBullet *> bulletsToDestroy{};
-    QVector<Enemy *> enemiesToDestroy{};
+    QVector<Bullet *> bulletsToDestroy{};
+    QVector<int> enemiesToRemove{};
 
-    foreach (PlayerBullet *bullet, bullets) {
-        auto enemyToDestroy = std::ranges::find_if(enemies, [&](Enemy *enemy) {
-            return isCollided(bullet, enemy);
-        });
-        if (enemyToDestroy == enemies.end())
-            continue;
-
-        bulletsToDestroy.push_back(bullet);
-        enemiesToDestroy.push_back(*enemyToDestroy);
-        m_audioManager.playHit();
-        updateScore();
+    foreach (Bullet *bullet, bullets) {
+        for (int enemyIdx = 0; enemyIdx < enemies.size(); enemyIdx++) {
+            if (isCollided(bullet, enemies[enemyIdx])) {
+                bulletsToDestroy.push_back(bullet);
+                if (!enemiesToRemove.contains(enemyIdx))
+                    enemiesToRemove.push_back(enemyIdx);
+                m_audioManager.playHit();
+                updateScore();
+            }
+        }
     }
 
-    foreach (PlayerBullet *bullet, bulletsToDestroy)
+    foreach (Bullet *bullet, bulletsToDestroy)
         m_bullet.destroyBullet(bullet);
 
-    foreach (Enemy *enemy, enemiesToDestroy)
-        m_enemy.destroyEnemy(enemy);
+    std::ranges::sort(enemiesToRemove, std::greater<int>());
 
-    // m_audioManager.playHit();
+    foreach (int enemyIdx, enemiesToRemove)
+        m_enemyManager->removeEnemy(enemyIdx);
 
     emit bulletsChanged();
-    emit enemiesChanged();
+    // emit enemiesChanged();
 }
 
 void GameController::checkEnemyPlayerCollision()
 {
-    auto &enemies = m_enemy.getEnemyLists();
+    auto &enemies = m_enemyManager->getEnemiesList();
 
     if (enemies.empty()) {
         return;
@@ -305,30 +335,27 @@ void GameController::checkEnemyPlayerCollision()
                       static_cast<qreal>(m_player->playerWidth()),
                       static_cast<qreal>(m_player->playerHeight())};
 
-    Enemy *enemyToDestroy = nullptr;
+    int enemyIndexToRemove;
 
-    for (Enemy *enemy : enemies) {
-        QRectF enemyRect{enemy->enemyX(),
-                         enemy->enemyY(),
-                         static_cast<qreal>(enemy->enemyWidth()),
-                         static_cast<qreal>(enemy->enemyHeight())};
+    for (size_t enemyIdx = 0; enemyIdx < enemies.size(); enemyIdx++) {
+        QRectF enemyRect{enemies[enemyIdx]->enemyX(),
+                         enemies[enemyIdx]->enemyY(),
+                         static_cast<qreal>(enemies[enemyIdx]->enemyWidth()),
+                         static_cast<qreal>(enemies[enemyIdx]->enemyHeight())};
 
-        if (enemy->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
-            enemyToDestroy = enemy;
+        if (enemies[enemyIdx]->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
+            enemyIndexToRemove = enemyIdx;
             m_audioManager.playGameOver();
             setGameState(GameState::GAMEOVER);
             gameReset();
             break;
         }
     }
-    m_enemy.destroyEnemy(enemyToDestroy);
+    m_enemyManager->removeEnemy(enemyIndexToRemove);
 }
 
 void GameController::gameReset()
 {
-    setScore(0);
-    setLevel(1);
-
     m_collisionTimer.stop();
     m_enemyCreationTimer.stop();
     m_playerMoveTimer.stop();
@@ -336,21 +363,15 @@ void GameController::gameReset()
 
     m_gameControllerSettings.setValue("game/highestScore", m_highestScore);
 
-    m_enemy.enemyReset();
-    emit enemiesChanged();
+    m_enemyManager->clearEnemies();
 
     m_bullet.bulletReset();
     emit bulletsChanged();
 }
 
-QQmlListProperty<PlayerBullet> GameController::bullets()
+QQmlListProperty<Bullet> GameController::bullets()
 {
-    return QQmlListProperty<PlayerBullet>(this, &m_bullet.getBulletLists());
-}
-
-QQmlListProperty<Enemy> GameController::enemies()
-{
-    return QQmlListProperty<Enemy>(this, &m_enemy.getEnemyLists());
+    return QQmlListProperty<Bullet>(this, &m_bullet.getBulletLists());
 }
 
 int GameController::score() const

@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include "EnemyManager.h"
 #include "GameController.h"
 #include "Player.h"
 

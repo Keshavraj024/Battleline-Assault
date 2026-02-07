@@ -11,11 +11,10 @@ ColumnLayout {
     property bool isGameRunning: false
 
     spacing: 10
-    visible: isGameRunning
 
     FontLoader {
         id: gameUHDFont
-        source : "../Assets/Fonts/Doto-ExtraBold.ttf"
+        source : "qrc:/qml/Assets/Fonts/Doto-ExtraBold.ttf"
     }
 
 

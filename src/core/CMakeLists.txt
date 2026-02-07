@@ -5,10 +5,12 @@ add_library(core STATIC
     include/SettingsManager.h
 )
 
-target_include_directories(core PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR}/src/entities/include)
+target_include_directories(core PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR}/src/entities/include
+${CMAKE_CURRENT_SOURCE_DIR}/src/managers/include)
 
 target_link_libraries(core PUBLIC
     Qt6::Core
     Qt6::Quick
     entities
+    managers
 )

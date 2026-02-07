@@ -11,12 +11,12 @@ Item {
         id: playerImage
         anchors.fill: playerRect
         fillMode: Image.PreserveAspectFit
-        source: "Assets/Player/Skyfire.png"
+        source: "qrc:/qml/Assets/Player/Skyfire.png"
     }
 
     AnimatedImage {
         id: fireGif
-        source: "Assets/Player/flame_flicker.gif"
+        source: "qrc:/qml/Assets/Player/flame_flicker.gif"
         sourceSize: "30x30"
         x: playerImage.x + 37
         y: playerImage.y - 10
@@ -30,19 +30,26 @@ Item {
                             GameController.moveRightPressed()
                         }
                         if(event.key === Qt.Key_Up){
-                            GameController.applyBoost()
+                            // GameController.applyBoost()
+                            GameController.setPressed(true)
                         }
                         if(event.key === Qt.Key_Space) {
                             GameController.shootBullet()
                         }
                         if(event.key === Qt.Key_Escape) {
-                            GameController.pauseGame()
+                            GameController.togglePause()
                         }
                     }
 
     Keys.onReleased: (event) => {
                          if (event.key === Qt.Key_Left || event.key === Qt.Key_Right)
-                         GameController.moveReleased()
+                            GameController.moveReleased()
+
+                         if(event.key === Qt.Key_Up){
+                             // GameController.applyBoost()
+                             GameController.setPressed(false)
+                         }
                      }
+
 
 }

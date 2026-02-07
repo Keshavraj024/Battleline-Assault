@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Assets/Enemies/AbyssalHexcrawler.png</file>
+        <file>qml/Assets/Enemies/AshmawSpectralite.png</file>
+        <file>qml/Assets/Enemies/BlazefangOverseer.png</file>
+        <file>qml/Assets/Enemies/CindervoidRavager.png</file>
+        <file>qml/Assets/Enemies/EmberclawRavager.png</file>
+        <file>qml/Assets/Enemies/InfernicTalonspawn.png</file>
+        <file>qml/Assets/Enemies/IronbaneSkitterlord.png</file>
+        <file>qml/Assets/Enemies/NetherfangSentinel.png</file>
+        <file>qml/Assets/Enemies/PyroniteWarDrone.png</file>
+        <file>qml/Assets/Enemies/PyrothorSovereign.png</file>
+        <file>qml/Assets/Enemies/VoidclawIncinerator.png</file>
+        <file>qml/Assets/Enemies/VoidreaverStrix.png</file>
+        <file>qml/Assets/Fonts/Doto-Bold.ttf</file>
+        <file>qml/Assets/Fonts/Doto-ExtraBold.ttf</file>
+        <file>qml/Assets/Fonts/Pixel Game.otf</file>
+        <file>qml/Assets/Fonts/PressStart2P-Regular.ttf</file>
+        <file>qml/Assets/Player/flame_flicker.gif</file>
+        <file>qml/Assets/Player/Skyfire.png</file>
+        <file>qml/Assets/Sounds/click.wav</file>
+        <file>qml/Assets/Sounds/game_over.wav</file>
+        <file>qml/Assets/Sounds/hit.wav</file>
+        <file>qml/Assets/Sounds/shoot.wav</file>
+        <file>qml/Assets/bgImg_1.png</file>
+    </qresource>
+</RCC>

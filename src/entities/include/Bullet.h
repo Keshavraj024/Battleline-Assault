@@ -5,7 +5,7 @@
 #include <QTimer>
 #include "SettingsManager.h"
 
-class PlayerBullet : public QObject
+class Bullet : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(double bulletX READ bulletX WRITE setBulletX NOTIFY bulletXChanged FINAL)
@@ -14,7 +14,7 @@ class PlayerBullet : public QObject
     Q_PROPERTY(int bulletHeight READ bulletHeight WRITE setBulletHeight NOTIFY bulletHeightChanged FINAL)
 
 public:
-    explicit PlayerBullet(QObject *parent = nullptr);
+    explicit Bullet(QObject *parent = nullptr);
 
     void initialize();
 
@@ -38,7 +38,7 @@ signals:
 
     void bulletHeightChanged();
 
-    void bulletOutofWindow(PlayerBullet* bulletToDestroy);
+    void bulletOutofWindow(Bullet* bulletToDestroy);
 
     void bulletListsChanged();
 
@@ -54,15 +54,15 @@ private:
     int m_bulletWidth;
     int m_bulletHeight;
 
-    QList<PlayerBullet *> m_bulletLists{};
+    QList<Bullet *> m_bulletLists{};
 
     SettingsManager &m_gameControllerSettings = SettingsManager::instance();
 
 private:
     friend class GameController;
 
-    void destroyBullet(PlayerBullet *bulletToDestroy);
-    QList<PlayerBullet *> &getBulletLists();
+    void destroyBullet(Bullet *bulletToDestroy);
+    QList<Bullet *> &getBulletLists();
     void addBullet();
     bool IsEmpty() const;
     void clearBulletLists();

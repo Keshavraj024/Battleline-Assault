@@ -17,12 +17,16 @@ Item {
     property bool isStarting: GameController?.gameState === GameStates.STARTING ?? false
     property bool isPaused: GameController?.gameState === GameStates.PAUSED ?? false
 
-    visible: !isRunning && !isGameOver
-
     FontLoader {
         id: menuFontLoader
-        source : "Assets/Fonts/PressStart2P-Regular.ttf"
+        source : "qrc:/qml/Assets/Fonts/PressStart2P-Regular.ttf"
     }
+
+    Keys.onPressed: (event) => {
+                        if(event.key === Qt.Key_Escape) {
+                            GameController.togglePause()
+                        }
+                    }
 
 
     ColumnLayout {
@@ -32,7 +36,7 @@ Item {
             id: gameTitle
             customText: "BATTLELINE ASSAULT"
             fontName: menuFontLoader
-            font.pixelSize: 52
+            font.pixelSize: 35
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -55,7 +59,7 @@ Item {
             labelText: "Resume"
             visible: isPaused
             onActionTriggered: function() {
-                GameController.resumeGame()
+                GameController.togglePause()
             }
         }
 

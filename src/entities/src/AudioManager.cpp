@@ -5,20 +5,16 @@
 AudioManager::AudioManager(QObject *parent)
     : QObject(parent)
 {
-    m_hitSound.setSource(
-        QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/hit.wav"));
+    m_hitSound.setSource(QUrl::fromLocalFile(":/qml/Assets/Sounds/hit.wav"));
     m_hitSound.setVolume(0.8f);
 
-    m_gameOverSound.setSource(
-        QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/game_over.wav"));
+    m_gameOverSound.setSource(QUrl::fromLocalFile(":/qml/Assets/Sounds/game_over.wav"));
     m_gameOverSound.setVolume(0.9f);
 
-    m_shootSound.setSource(
-        QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/shoot.wav"));
+    m_shootSound.setSource(QUrl::fromLocalFile(":/qml/Assets/Sounds/shoot.wav"));
     m_shootSound.setVolume(1.0f);
 
-    m_clickSound.setSource(
-        QUrl::fromLocalFile(":/qt/qml/Battleline_Assault/qml/Assets/Sounds/click.wav"));
+    m_clickSound.setSource(QUrl::fromLocalFile(":/qml/Assets/Sounds/click.wav"));
     m_clickSound.setVolume(1.0f);
 }
 

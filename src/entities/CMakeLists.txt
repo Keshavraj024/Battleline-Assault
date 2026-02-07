@@ -3,11 +3,11 @@ find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 add_library(entities STATIC
     src/Enemy.cpp
     src/Player.cpp
-    src/PlayerBullet.cpp
+    src/Bullet.cpp
     src/AudioManager.cpp
     include/Enemy.h
     include/Player.h
-    include/PlayerBullet.h
+    include/Bullet.h
     include/AudioManager.h 
 )
 
