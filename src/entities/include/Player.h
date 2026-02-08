@@ -2,22 +2,22 @@
 #define PLAYER_H
 
 #include <QObject>
-#include "SettingsManager.h"
 
 class Player : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(double playerCurrentX READ playerCurrentX WRITE setPlayerCurrentX NOTIFY playerCurrentXChanged FINAL)
-        Q_PROPERTY(double playerCurrentY READ playerCurrentY WRITE setPlayerCurrentY NOTIFY playerCurrentYChanged FINAL)
+    Q_PROPERTY(double playerCurrentX READ playerCurrentX WRITE setPlayerCurrentX NOTIFY
+                   playerCurrentXChanged FINAL)
+    Q_PROPERTY(double playerCurrentY READ playerCurrentY WRITE setPlayerCurrentY NOTIFY
+                   playerCurrentYChanged FINAL)
 
     Q_PROPERTY(int playerWidth READ playerWidth WRITE setPlayerWidth NOTIFY playerWidthChanged FINAL)
-    Q_PROPERTY(int playerHeight READ playerHeight WRITE setPlayerHeight NOTIFY playerHeightChanged FINAL)
+    Q_PROPERTY(
+        int playerHeight READ playerHeight WRITE setPlayerHeight NOTIFY playerHeightChanged FINAL)
 
 public:
-    explicit Player(QObject *parent = nullptr);
-
-    void initialize();
+    explicit Player(double startX, double startY, int width, int height, QObject *parent = nullptr);
 
     double playerCurrentX() const;
     void setPlayerCurrentX(double newPlayerCurrentX);
@@ -42,12 +42,9 @@ signals:
 private:
     double m_playerCurrentX;
     double m_playerCurrentY;
+
     int m_playerWidth;
     int m_playerHeight;
-    int m_windowWidth;
-    int m_windowHeight;
-
-    SettingsManager &m_gameControllerSettings = SettingsManager::instance();
 };
 
 #endif // PLAYER_H

@@ -2,10 +2,13 @@ import QtQuick
 
 Item {
     id: playerRect
-    width: PlayerController === null ? 0 : PlayerController.playerWidth
-    height: PlayerController === null ? 0 : PlayerController.playerHeight
-    x: PlayerController === null ? 0 : PlayerController.playerCurrentX
-    y: PlayerController === null ? 0 : PlayerController.playerCurrentY
+
+    property var playerObject: null
+
+    width: playerObject?.playerWidth ?? 1
+    height: playerObject?.playerHeight ?? 1
+    x: playerObject?.playerCurrentX ?? 0
+    y: playerObject?.playerCurrentY ?? 0
 
     Image {
         id: playerImage

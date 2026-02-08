@@ -1,5 +1,4 @@
 #include "Enemy.h"
-#include <QRandomGenerator>
 
 Enemy::Enemy(int width, int height, QObject *parent)
     : QObject{parent}

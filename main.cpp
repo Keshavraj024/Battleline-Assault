@@ -11,9 +11,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    Player *player = new Player(&app);
-
-    GameController gameController(player, &app);
+    GameController gameController(&app);
 
     qmlRegisterUncreatableType<GameController>("GameEnums",
                                                1,
@@ -23,7 +21,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("GameController", &gameController);
 
-    engine.rootContext()->setContextProperty("PlayerController", player);
+    // engine.rootContext()->setContextProperty("PlayerController", player);
 
     QObject::connect(
         &engine,

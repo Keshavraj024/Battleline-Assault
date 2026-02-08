@@ -147,6 +147,7 @@ Window {
         id: playerRect
         focus : root.isGameRunning
         visible: !root.isGameStarting && !root.isGameOver
+        playerObject: GameController?.player
     }
 
 

@@ -13,9 +13,8 @@ constexpr qreal PLAYER_ACCL = 3000.0;
 constexpr qreal PLAYER_FRICTION = 2500.0;
 constexpr int FRAME_COUNT_PER_SEC = 60;
 
-GameController::GameController(Player *player, QObject *parent)
+GameController::GameController(QObject *parent)
     : QObject{parent}
-    , m_player(player)
 {
     m_windowWidth = m_gameControllerSettings.getValue("Window/width").toInt();
     m_windowHeight = m_gameControllerSettings.getValue("Window/height").toInt();
@@ -25,8 +24,11 @@ GameController::GameController(Player *player, QObject *parent)
     m_bulletWidth = m_gameControllerSettings.getValue("Bullet/width").toInt();
     m_bulletHeight = m_gameControllerSettings.getValue("Bullet/height").toInt();
 
-    m_enemyWidth = m_gameControllerSettings.getValue("enemy/width").toInt();
-    m_enemyHeight = m_gameControllerSettings.getValue("enemy/height").toInt();
+    m_enemyWidth = m_gameControllerSettings.getValue("Enemy/width").toInt();
+    m_enemyHeight = m_gameControllerSettings.getValue("Enemy/height").toInt();
+
+    m_playerWidth = m_gameControllerSettings.getValue("Player/width").toInt();
+    m_playerHeight = m_gameControllerSettings.getValue("Player/height").toInt();
 
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
     m_thrustTimer.setInterval(16);
@@ -36,6 +38,39 @@ GameController::GameController(Player *player, QObject *parent)
 
     m_enemyManager = new EnemyManager(this);
     m_bulletManager = new BulletManager(this);
+
+    m_player = new Player(0, 0, m_playerWidth, m_playerHeight, this);
+    updatePlayerStartingPosition();
+}
+
+void GameController::initialize()
+{
+    updatePlayerStartingPosition();
+
+    m_gameTimer.start();
+
+    m_elapsedTimer.start();
+
+    if (!m_frameTimer.isValid()) {
+        m_frameTimer.start();
+    }
+
+    setScore(0);
+    setLevel(1);
+
+    m_bulletCreationTimer.setSingleShot(true);
+}
+
+void GameController::updatePlayerStartingPosition()
+{
+    if (!m_player)
+        return;
+
+    float playerStartX = m_windowWidth / 2 - m_playerWidth / 2;
+    float playerStartY = m_windowHeight - m_playerHeight;
+
+    m_player->setPlayerCurrentX(playerStartX);
+    m_player->setPlayerCurrentY(playerStartY);
 }
 
 void GameController::gameTick()
@@ -76,24 +111,6 @@ EnemyManager *GameController::enemyManager() const
 BulletManager *GameController::bulletManager() const
 {
     return m_bulletManager;
-}
-
-void GameController::initialize()
-{
-    m_gameTimer.start();
-
-    m_elapsedTimer.start();
-
-    if (!m_frameTimer.isValid()) {
-        m_frameTimer.start();
-    }
-
-    setScore(0);
-    setLevel(1);
-
-    m_player->initialize();
-
-    m_bulletCreationTimer.setSingleShot(true);
 }
 
 void GameController::moveReleased()
@@ -188,6 +205,7 @@ void GameController::setWindowHeight(int newWindowHeight)
 
 void GameController::applyBoost()
 {
+    qDebug() << "Applying boost";
     m_playerYOffset = -10;
     if (!m_thrustTimer.isActive())
         m_thrustTimer.start(); // 60 FPS
@@ -214,8 +232,8 @@ void GameController::applyGravity()
 {
     double newYPos = m_player->playerCurrentY() + m_playerYOffset;
 
-    if (newYPos > (m_windowHeight - m_player->playerHeight())) {
-        newYPos = m_windowHeight - m_player->playerHeight();
+    if (newYPos > (m_windowHeight - m_playerHeight)) {
+        newYPos = m_windowHeight - m_playerHeight;
         if (m_thrustTimer.isActive())
             m_thrustTimer.stop();
     }
@@ -251,7 +269,7 @@ void GameController::updatePlayerMovement()
 
     int newPos = m_player->playerCurrentX() + m_velocityX * dt;
 
-    newPos = std::clamp(newPos, m_minX, m_windowWidth - m_player->playerWidth());
+    newPos = std::clamp(newPos, m_playerminX, m_windowWidth - m_player->playerWidth());
     m_player->setPlayerCurrentX(newPos);
 }
 
@@ -415,4 +433,9 @@ void GameController::setGameState(GameState newGameState)
         return;
     m_gameState = newGameState;
     emit gameStateChanged();
+}
+
+Player *GameController::player() const
+{
+    return m_player;
 }
