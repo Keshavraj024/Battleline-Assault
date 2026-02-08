@@ -1,21 +1,11 @@
 #include "Enemy.h"
 #include <QRandomGenerator>
 
-Enemy::Enemy(QObject *parent)
+Enemy::Enemy(int width, int height, QObject *parent)
     : QObject{parent}
-{
-    initialize();
-}
-
-void Enemy::initialize()
-{
-    m_enemyWidth = m_gameControllerSettings.getValue("enemy/width").toInt();
-    m_enemyHeight = m_gameControllerSettings.getValue("enemy/height").toInt();
-
-    m_windowHeight =  m_gameControllerSettings.getValue("window/height").toInt();
-    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-}
-
+    , m_enemyWidth(width)
+    , m_enemyHeight(height)
+{}
 
 double Enemy::enemyX() const
 {

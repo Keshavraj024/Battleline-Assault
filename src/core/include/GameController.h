@@ -6,12 +6,11 @@
 #include <QSettings>
 #include <QTimer>
 #include "AudioManager.h"
-#include "Bullet.h"
-#include "Enemy.h"
 #include "Player.h"
 #include "SettingsManager.h"
 #include <qdatetime.h>
 
+#include "BulletManager.h"
 #include "EnemyManager.h"
 
 class GameController : public QObject
@@ -20,7 +19,6 @@ class GameController : public QObject
 
     Q_PROPERTY(int windowWidth READ windowWidth WRITE setWindowWidth NOTIFY windowWidthChanged FINAL)
     Q_PROPERTY(int windowHeight READ windowHeight WRITE setWindowHeight NOTIFY windowHeightChanged FINAL)
-    Q_PROPERTY(QQmlListProperty<Bullet> bullets READ bullets NOTIFY bulletsChanged FINAL)
     Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged FINAL)
     Q_PROPERTY(int highestScore READ highestScore WRITE setHighestScore NOTIFY highestScoreChanged FINAL)
     Q_PROPERTY(int level READ level WRITE setLevel NOTIFY levelChanged FINAL)
@@ -28,6 +26,7 @@ class GameController : public QObject
                    gameStateChanged FINAL)
 
     Q_PROPERTY(EnemyManager *enemyManager READ enemyManager CONSTANT)
+    Q_PROPERTY(BulletManager *bulletManager READ bulletManager CONSTANT)
 
 public:
     explicit GameController(Player *player, QObject *parent = nullptr);
@@ -80,8 +79,6 @@ public:
     int playerHeight() const;
     void setPlayerHeight(int newPlayerHeight);
 
-    QQmlListProperty<Bullet> bullets();
-
     int score() const;
     void setScore(int newScore);
 
@@ -129,8 +126,15 @@ private:
     int m_minX {0};
     int m_windowWidth;
     int m_windowHeight;
-    float m_gravity {0.5};
-    int m_score {0};
+
+    int m_bulletWidth{0};
+    int m_bulletHeight{0};
+
+    int m_enemyWidth{0};
+    int m_enemyHeight{0};
+
+    float m_gravity{0.5};
+    int m_score{0};
     int m_highestScore {0};
     int m_level{1};
 
@@ -142,24 +146,23 @@ private:
 
     QTimer m_bulletCreationTimer;
 
-    QQmlListProperty<Bullet> m_bullets;
-
-    Bullet m_bullet;
-
     EnemyManager *m_enemyManager;
+    BulletManager *m_bulletManager;
 
     AudioManager m_audioManager;
-
-    QQmlListProperty<Enemy> m_enemies;
 
     MoveDirection m_moveDir {MoveDirection::NONE};
 
     Player *m_player;
 
     qreal m_velocityX;
-    QElapsedTimer m_elapsedTimer;
 
-    EnemyManager *enemyManager() const { return m_enemyManager; }
+    QElapsedTimer m_elapsedTimer;
+    QElapsedTimer m_frameTimer;
+    float m_timeSinceLastSpawn{0.0f};
+
+    EnemyManager *enemyManager() const;
+    BulletManager *bulletManager() const;
 
     bool m_KeyUpPressed{false};
 

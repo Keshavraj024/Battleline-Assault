@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QTimer>
-#include "SettingsManager.h"
 
 class Bullet : public QObject
 {
@@ -14,9 +13,7 @@ class Bullet : public QObject
     Q_PROPERTY(int bulletHeight READ bulletHeight WRITE setBulletHeight NOTIFY bulletHeightChanged FINAL)
 
 public:
-    explicit Bullet(QObject *parent = nullptr);
-
-    void initialize();
+    explicit Bullet(double startX, double startY, int width, int height, QObject *parent = nullptr);
 
     double bulletX() const;
     void setBulletX(double newBulletX);
@@ -35,41 +32,13 @@ signals:
     void bulletYChanged();
 
     void bulletWidthChanged();
-
     void bulletHeightChanged();
-
-    void bulletOutofWindow(Bullet* bulletToDestroy);
-
-    void bulletListsChanged();
-
-private slots:
-    void updateBulletPos();
 
 private:
     double m_bulletX;
     double m_bulletY;
-    double m_ySpeed {5.0};
-
-    QTimer m_timer;
     int m_bulletWidth;
     int m_bulletHeight;
-
-    QList<Bullet *> m_bulletLists{};
-
-    SettingsManager &m_gameControllerSettings = SettingsManager::instance();
-
-private:
-    friend class GameController;
-
-    void destroyBullet(Bullet *bulletToDestroy);
-    QList<Bullet *> &getBulletLists();
-    void addBullet();
-    bool IsEmpty() const;
-    void clearBulletLists();
-    size_t bulletListsSize() const;
-    void bulletReset();
-    void stopBulletFallTimer();
-    void resumeBulletFallTimer();
 };
 
 #endif // PLAYERBULLET_H

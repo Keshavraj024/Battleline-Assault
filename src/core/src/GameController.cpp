@@ -17,10 +17,16 @@ GameController::GameController(Player *player, QObject *parent)
     : QObject{parent}
     , m_player(player)
 {
-    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+    m_windowWidth = m_gameControllerSettings.getValue("Window/width").toInt();
+    m_windowHeight = m_gameControllerSettings.getValue("Window/height").toInt();
 
-    m_highestScore = m_gameControllerSettings.getValue("game/highestScore").toInt();
+    m_highestScore = m_gameControllerSettings.getValue("Game/highestScore").toInt();
+
+    m_bulletWidth = m_gameControllerSettings.getValue("Bullet/width").toInt();
+    m_bulletHeight = m_gameControllerSettings.getValue("Bullet/height").toInt();
+
+    m_enemyWidth = m_gameControllerSettings.getValue("enemy/width").toInt();
+    m_enemyHeight = m_gameControllerSettings.getValue("enemy/height").toInt();
 
     connect(&m_thrustTimer, &QTimer::timeout, this, &GameController::applyGravity);
     m_thrustTimer.setInterval(16);
@@ -29,10 +35,21 @@ GameController::GameController(Player *player, QObject *parent)
     m_gameTimer.setInterval(16);
 
     m_enemyManager = new EnemyManager(this);
+    m_bulletManager = new BulletManager(this);
 }
 
 void GameController::gameTick()
 {
+    float deltaTime = 0.0f;
+
+    // Initialize timer if invalid, but DON'T return
+    if (!m_frameTimer.isValid()) {
+        m_frameTimer.start();
+        // deltaTime stays 0.0f for the very first frame
+    } else {
+        deltaTime = std::min(m_frameTimer.restart() / 1000.0f, 0.03f);
+    }
+
     checkCollision();
     updatePlayerMovement();
 
@@ -40,19 +57,36 @@ void GameController::gameTick()
         applyBoost();
     }
 
-    static int frameRate = 0;
-    frameRate++;
+    m_timeSinceLastSpawn += deltaTime;
 
-    if ((frameRate % int(FRAME_COUNT_PER_SEC * m_spawnEnemyIntervalInSec)) == 0) {
-        m_enemyManager->spawnEnemy(m_windowWidth);
-        frameRate = 0;
+    float spawnThreshold = std::max(MIN_INTERVAL, BASE_INTERVAL - (DECREASE_PER_LEVEL * m_level))
+                           / 1000.f;
+
+    if (m_timeSinceLastSpawn >= spawnThreshold) {
+        m_enemyManager->spawnEnemy(m_enemyWidth, m_enemyHeight, m_windowWidth);
+        m_timeSinceLastSpawn = 0.0f;
     }
+}
+
+EnemyManager *GameController::enemyManager() const
+{
+    return m_enemyManager;
+}
+
+BulletManager *GameController::bulletManager() const
+{
+    return m_bulletManager;
 }
 
 void GameController::initialize()
 {
     m_gameTimer.start();
+
     m_elapsedTimer.start();
+
+    if (!m_frameTimer.isValid()) {
+        m_frameTimer.start();
+    }
 
     setScore(0);
     setLevel(1);
@@ -60,9 +94,6 @@ void GameController::initialize()
     m_player->initialize();
 
     m_bulletCreationTimer.setSingleShot(true);
-
-    m_gameControllerSettings.setValue("player/startX", m_player->playerCurrentX());
-    m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
 }
 
 void GameController::moveReleased()
@@ -82,11 +113,13 @@ void GameController::togglePause()
         m_gameTimer.stop();
 
         m_enemyManager->togglePause(true);
+        m_bulletManager->togglePause(true);
         setGameState(GameState::PAUSED);
+
     } else if (m_gameState == GameState::PAUSED) {
         m_gameTimer.start();
         m_enemyManager->togglePause(false);
-        m_bullet.resumeBulletFallTimer();
+        m_bulletManager->togglePause(false);
 
         setGameState(GameState::RUNNING);
     }
@@ -165,11 +198,14 @@ void GameController::shootBullet()
     if (!m_bulletCreationTimer.isActive()) {
         m_audioManager.playShoot();
 
-        m_gameControllerSettings.setValue("player/startX", m_player->playerCurrentX());
-        m_gameControllerSettings.setValue("player/startY", m_player->playerCurrentY());
+        double px = m_player->playerCurrentX();
+        double py = m_player->playerCurrentY();
+        double pw = m_player->playerWidth();
 
-        m_bullet.addBullet();
-        emit bulletsChanged();
+        double startX = (px + pw / 2.0) - (m_bulletWidth / 2.0);
+        double startY = py - m_bulletHeight;
+
+        m_bulletManager->spawnBullet(startX, startY, m_bulletWidth, m_bulletHeight);
         m_bulletCreationTimer.start(50);
     }
 }
@@ -246,10 +282,8 @@ void GameController::updateScore()
 {
     setScore(m_score + SCORE_PER_KILL);
 
-    if (m_score % 10 == 0) {
+    if (m_score % LEVEL_UP_ENTRY == 0) {
         setLevel(m_level + 1);
-        m_spawnEnemyIntervalInSec = (std::max(200, BASE_INTERVAL - (DECREASE_PER_LEVEL * m_level)))
-                                    / 1000.f;
     }
 
     if (m_score > m_highestScore)
@@ -258,37 +292,37 @@ void GameController::updateScore()
 
 void GameController::checkBulletEnemyCollision()
 {
-    auto &bullets = m_bullet.getBulletLists();
+    auto &bullets = m_bulletManager->getBulletsList();
     auto &enemies = m_enemyManager->getEnemiesList();
 
     if (bullets.empty() || enemies.empty())
         return;
 
-    QVector<Bullet *> bulletsToDestroy{};
-    QVector<int> enemiesToRemove{};
+    QVector<int> enemyindicesToRemove{};
+    QVector<int> bulletIndicesToRemove{};
 
-    foreach (Bullet *bullet, bullets) {
+    for (int bulletIdx = 0; bulletIdx < bullets.size(); bulletIdx++) {
         for (int enemyIdx = 0; enemyIdx < enemies.size(); enemyIdx++) {
-            if (isCollided(bullet, enemies[enemyIdx])) {
-                bulletsToDestroy.push_back(bullet);
-                if (!enemiesToRemove.contains(enemyIdx))
-                    enemiesToRemove.push_back(enemyIdx);
+            if (isCollided(bullets[bulletIdx], enemies[enemyIdx])) {
+                if (!enemyindicesToRemove.contains(enemyIdx))
+                    enemyindicesToRemove.push_back(enemyIdx);
+
+                if (!bulletIndicesToRemove.contains(bulletIdx))
+                    bulletIndicesToRemove.push_back(bulletIdx);
+
                 m_audioManager.playHit();
                 updateScore();
             }
         }
     }
 
-    foreach (Bullet *bullet, bulletsToDestroy)
-        m_bullet.destroyBullet(bullet);
-
-    std::ranges::sort(enemiesToRemove, std::greater<int>());
-
-    foreach (int enemyIdx, enemiesToRemove)
+    std::ranges::sort(enemyindicesToRemove, std::greater<int>());
+    foreach (int enemyIdx, enemyindicesToRemove)
         m_enemyManager->removeEnemy(enemyIdx);
 
-    emit bulletsChanged();
-    // emit enemiesChanged();
+    std::ranges::sort(bulletIndicesToRemove, std::greater<int>());
+    foreach (int bulletIdx, bulletIndicesToRemove)
+        m_bulletManager->removeBullet(bulletIdx);
 }
 
 void GameController::checkEnemyPlayerCollision()
@@ -325,17 +359,10 @@ void GameController::gameReset()
 
     m_moveDir = MoveDirection::NONE;
 
-    m_gameControllerSettings.setValue("game/highestScore", m_highestScore);
+    m_gameControllerSettings.setValue("Game/highestScore", m_highestScore);
 
     m_enemyManager->clearEnemies();
-
-    m_bullet.bulletReset();
-    emit bulletsChanged();
-}
-
-QQmlListProperty<Bullet> GameController::bullets()
-{
-    return QQmlListProperty<Bullet>(this, &m_bullet.getBulletLists());
+    m_bulletManager->clearBullets();
 }
 
 int GameController::score() const

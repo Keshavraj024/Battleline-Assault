@@ -151,7 +151,7 @@ Window {
 
 
     Repeater {
-        model: root.bullets
+        model: GameController?.bulletManager
         delegate: Bullet {
         }
     }

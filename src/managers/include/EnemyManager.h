@@ -16,7 +16,7 @@ class EnemyManager : public QAbstractListModel
 public:
     explicit EnemyManager(QObject *parent = nullptr);
 
-    void spawnEnemy(int windowWidth);
+    void spawnEnemy(const int width, const int height, const int windowWidth);
     void removeEnemy(int index);
 
     int rowCount(const QModelIndex &parent) const override;

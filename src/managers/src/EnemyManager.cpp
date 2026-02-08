@@ -75,7 +75,7 @@ void EnemyManager::togglePause(bool paused)
     }
 }
 
-void EnemyManager::spawnEnemy(int windowWidth)
+void EnemyManager::spawnEnemy(const int width, const int height, const int windowWidth)
 {
     static const QStringList imagesURL{
         "qrc:/qml/Assets/Enemies/AbyssalHexcrawler.png",
@@ -99,7 +99,7 @@ void EnemyManager::spawnEnemy(int windowWidth)
 
     beginInsertRows(QModelIndex(), modelIndex, modelIndex);
 
-    Enemy *newEnemy = new Enemy(this);
+    Enemy *newEnemy = new Enemy(width, height, this);
     newEnemy->setEnemyX(startX);
     newEnemy->setEnemyY(-50);
     newEnemy->setImageSource(imagesURL[randomImageIndex]);

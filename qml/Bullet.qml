@@ -2,10 +2,10 @@ import QtQuick
 
 Item {
     id: playerBullet
-    width: model.bulletWidth
-    height: model.bulletHeight
-    x: model.bulletX
-    y: model.bulletY
+    width: bulletObject.bulletWidth
+    height: bulletObject.bulletHeight
+    x: bulletObject.bulletX
+    y: bulletObject.bulletY
 
     AnimatedImage {
         id: fireGif

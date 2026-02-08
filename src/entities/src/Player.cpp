@@ -5,11 +5,11 @@ Player::Player(QObject *parent)
 {
     initialize();
 
-    m_playerWidth = m_gameControllerSettings.getValue("player/width").toInt();
-    m_playerHeight = m_gameControllerSettings.getValue("player/height").toInt();
+    m_playerWidth = m_gameControllerSettings.getValue("Player/width").toInt();
+    m_playerHeight = m_gameControllerSettings.getValue("Player/height").toInt();
 
-    m_windowWidth = m_gameControllerSettings.getValue("window/width").toInt();
-    m_windowHeight = m_gameControllerSettings.getValue("window/height").toInt();
+    m_windowWidth = m_gameControllerSettings.getValue("Window/width").toInt();
+    m_windowHeight = m_gameControllerSettings.getValue("Window/height").toInt();
 }
 
 void Player::initialize()

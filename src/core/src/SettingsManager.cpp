@@ -7,27 +7,24 @@ SettingsManager::SettingsManager() {
         }
     };
 
-    setDefault("window/width", 1280);
-    setDefault("window/height", 720);
+    setDefault("Window/width", 1280);
+    setDefault("Window/height", 720);
 
-    setDefault("player/width", 100);
-    setDefault("player/height", 100);
+    setDefault("Player/width", 100);
+    setDefault("Player/height", 100);
 
-    setDefault("enemy/width", 70);
-    setDefault("enemy/height", 70);
-    setDefault("enemy/startY", -50);
+    setDefault("Enemy/width", 70);
+    setDefault("Enemy/height", 70);
 
-    setDefault("playerBullet/width", 10);
-    setDefault("playerBullet/height", 50);
+    setDefault("Bullet/width", 10);
+    setDefault("Bullet/height", 50);
 
-    setDefault("enemy/count", 12);
+    setDefault("Game/highestScore", 0);
 
-    setDefault("game/highestScore", 0);
-
-    setDefault("audio/globalVolume", 0.6f);
-    setDefault("audio/hitVolume", 0.6f);
-    setDefault("audio/sho0tVolume", 0.6f);
-    setDefault("audio/gameOverVolume", 0.6f);
+    setDefault("Audio/globalVolume", 0.6f);
+    setDefault("Audio/hitVolume", 0.6f);
+    setDefault("Audio/shootVolume", 0.6f);
+    setDefault("Audio/gameOverVolume", 0.6f);
 }
 
 SettingsManager &SettingsManager::instance()
