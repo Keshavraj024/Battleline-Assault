@@ -31,6 +31,7 @@ public:
 
 private:
     QList<Enemy *> m_enemyLists;
+    int m_windowHeight{0};
 
     QTimer *m_updateTimer;
     float m_enemyFallSpeed{0.8f};

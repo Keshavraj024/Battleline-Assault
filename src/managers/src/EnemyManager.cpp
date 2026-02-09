@@ -49,7 +49,7 @@ void EnemyManager::onUpdateTick()
         float newY = enemy->enemyY() + m_enemyFallSpeed;
         enemy->setEnemyY(newY);
 
-        if (newY > 800) {
+        if (newY > m_windowHeight) {
             removeEnemy(enemyIdx);
         }
     }
@@ -91,6 +91,8 @@ void EnemyManager::spawnEnemy(const int width, const int height, const int windo
         "qrc:/qml/Assets/Enemies/InfernicTalonspawn.png",
         "qrc:/qml/Assets/Enemies/CindervoidRavager.png",
     };
+
+    m_windowHeight = height;
 
     int startX = QRandomGenerator::global()->bounded(50, windowWidth - 50);
     const int modelIndex = m_enemyLists.size();

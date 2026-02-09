@@ -141,7 +141,7 @@ private:
 
     MoveDirection m_moveDir {MoveDirection::NONE};
 
-    qreal m_velocityX;
+    qreal m_playervelocityX;
 
     float m_timeSinceLastSpawn{0.0f};
 

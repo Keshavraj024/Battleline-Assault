@@ -41,6 +41,8 @@ GameController::GameController(QObject *parent)
 
     m_player = new Player(0, 0, m_playerWidth, m_playerHeight, this);
     updatePlayerStartingPosition();
+
+    m_bulletCreationTimer.setSingleShot(true);
 }
 
 void GameController::initialize()
@@ -57,8 +59,6 @@ void GameController::initialize()
 
     setScore(0);
     setLevel(1);
-
-    m_bulletCreationTimer.setSingleShot(true);
 }
 
 void GameController::updatePlayerStartingPosition()
@@ -80,7 +80,7 @@ void GameController::gameTick()
     if (!m_frameTimer.isValid()) {
         m_frameTimer.start();
     } else {
-        deltaTime = std::min(m_frameTimer.restart() / 1000.0f, 0.03f);
+        deltaTime = std::min(m_frameTimer.restart() / 1000.0f, 0.03f); // in sec
     }
 
     checkCollision();
@@ -254,17 +254,17 @@ void GameController::updatePlayerMovement()
         input = 1.0;
 
     if (input != 0.0)
-        m_velocityX += PLAYER_ACCL * input * dt;
+        m_playervelocityX += PLAYER_ACCL * input * dt;
     else {
-        if (m_velocityX < 0.0)
-            m_velocityX = std::min(0.0, m_velocityX + PLAYER_FRICTION * dt);
-        else if (m_velocityX > 0.0)
-            m_velocityX = std::max(0.0, m_velocityX - PLAYER_FRICTION * dt);
+        if (m_playervelocityX < 0.0)
+            m_playervelocityX = std::min(0.0, m_playervelocityX + PLAYER_FRICTION * dt);
+        else if (m_playervelocityX > 0.0)
+            m_playervelocityX = std::max(0.0, m_playervelocityX - PLAYER_FRICTION * dt);
     }
 
-    m_velocityX = std::clamp(m_velocityX, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
+    m_playervelocityX = std::clamp(m_playervelocityX, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
 
-    int newPos = m_player->playerCurrentX() + m_velocityX * dt;
+    int newPos = m_player->playerCurrentX() + m_playervelocityX * dt;
 
     newPos = std::clamp(newPos, m_playerminX, m_windowWidth - m_player->playerWidth());
     m_player->setPlayerCurrentX(newPos);
