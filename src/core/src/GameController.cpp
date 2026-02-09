@@ -77,10 +77,8 @@ void GameController::gameTick()
 {
     float deltaTime = 0.0f;
 
-    // Initialize timer if invalid, but DON'T return
     if (!m_frameTimer.isValid()) {
         m_frameTimer.start();
-        // deltaTime stays 0.0f for the very first frame
     } else {
         deltaTime = std::min(m_frameTimer.restart() / 1000.0f, 0.03f);
     }
@@ -205,7 +203,6 @@ void GameController::setWindowHeight(int newWindowHeight)
 
 void GameController::applyBoost()
 {
-    qDebug() << "Applying boost";
     m_playerYOffset = -10;
     if (!m_thrustTimer.isActive())
         m_thrustTimer.start(); // 60 FPS
@@ -379,7 +376,11 @@ void GameController::gameReset()
 
     m_gameControllerSettings.setValue("Game/highestScore", m_highestScore);
 
+    m_KeyUpPressed = false;
+
     m_enemyManager->clearEnemies();
+    m_enemyManager->togglePause(false);
+
     m_bulletManager->clearBullets();
 }
 

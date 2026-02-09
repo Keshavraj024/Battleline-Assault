@@ -33,7 +33,6 @@ Item {
                             GameController.moveRightPressed()
                         }
                         if(event.key === Qt.Key_Up){
-                            // GameController.applyBoost()
                             GameController.setPressed(true)
                         }
                         if(event.key === Qt.Key_Space) {
@@ -49,7 +48,6 @@ Item {
                             GameController.moveReleased()
 
                          if(event.key === Qt.Key_Up){
-                             // GameController.applyBoost()
                              GameController.setPressed(false)
                          }
                      }
