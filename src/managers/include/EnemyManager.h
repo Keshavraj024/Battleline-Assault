@@ -5,6 +5,7 @@
 
 #include <QList>
 #include "Enemy.h"
+#include "SettingsManager.h"
 
 class EnemyManager : public QAbstractListModel
 {
@@ -31,12 +32,13 @@ public:
 
 private:
     QList<Enemy *> m_enemyLists;
-    int m_windowHeight{0};
+
+    SettingsManager &m_settings{SettingsManager::instance()};
+    int m_windowHeight{m_settings.getValue("window/height").toInt()};
 
     QTimer *m_updateTimer;
     float m_enemyFallSpeed{0.8f};
 
-    // QAbstractItemModel interface
 private slots:
     void onUpdateTick();
 };

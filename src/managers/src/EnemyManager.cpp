@@ -92,8 +92,6 @@ void EnemyManager::spawnEnemy(const int width, const int height, const int windo
         "qrc:/qml/Assets/Enemies/CindervoidRavager.png",
     };
 
-    m_windowHeight = height;
-
     int startX = QRandomGenerator::global()->bounded(50, windowWidth - 50);
     const int modelIndex = m_enemyLists.size();
 

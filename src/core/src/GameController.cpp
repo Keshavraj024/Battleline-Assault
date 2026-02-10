@@ -359,7 +359,9 @@ void GameController::checkEnemyPlayerCollision()
                          static_cast<qreal>(enemies[enemyIdx]->enemyWidth()),
                          static_cast<qreal>(enemies[enemyIdx]->enemyHeight())};
 
-        if (enemies[enemyIdx]->enemyY() > m_windowHeight || playerRect.intersects(enemyRect)) {
+        if (enemies[enemyIdx]->enemyY() > m_windowHeight
+            || enemies[enemyIdx]->enemyY() > m_player->playerCurrentY()
+            || playerRect.intersects(enemyRect)) {
             m_audioManager.playGameOver();
             setGameState(GameState::GAMEOVER);
             gameReset();
